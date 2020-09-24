@@ -27,13 +27,22 @@ for i in range(2):
                     replace('ui', "u'i").replace('uo', "u'o").\
                     replace('uu', "u'u")
 
-"""
+
 syllables = []
 for i in range(0, len(rapanui), 2):
     syllables.append(rapanui[i:i+2])
-syllables = '-'.join(syllables)
-print(syllables)
-"""
+
+freqs = {}
+for syl in syllables:
+    if syl in freqs:
+        freqs[syl] += 1
+    else:
+        freqs[syl] = 1
+l = [s for s in freqs]
+l.sort(key=lambda s: freqs[s], reverse=True)
+for s in l:
+    print(s, freqs[s] / len(syllables))
+
 def write_corpus():
     samples = []
     for i in range(0, len(rapanui), 200):
