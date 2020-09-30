@@ -117,35 +117,76 @@ def get_stats(tablets):
 
 
 def concordance(tablets):
-    concord = {}
+    trigrams = {}
+    previous = {}
+    next_ = {}
 
     for tablet in tablets:
         for side in tablets[tablet]:
             for line in tablets[tablet][side]:
                 glyphs = tablets[tablet][side][line].split('-')
 
-                for i in range(1, len(glyphs) - 1):
-                    if glyphs[i] not in concord:
-                        concord[glyphs[i]] = {}
-                    a, b = glyphs[i-1], glyphs[i+1]
-                    if (a, b) in concord[glyphs[i]]:
-                        concord[glyphs[i]][(a, b)] += 1
-                    else:
-                        concord[glyphs[i]][(a, b)] = 1
+                for i in range(len(glyphs)):
+                    if i > 0 and i < len(glyphs) - 1:
+                        # Trigrams
+                        if glyphs[i] not in trigrams:
+                            trigrams[glyphs[i]] = {}
+                        a, b = glyphs[i-1], glyphs[i+1]
+                        if (a, b) in trigrams[glyphs[i]]:
+                            trigrams[glyphs[i]][(a, b)] += 1
+                        else:
+                            trigrams[glyphs[i]][(a, b)] = 1
 
-    return concord
+                    # Previous
+                    if i > 0:
+                        if glyphs[i] not in previous:
+                            previous[glyphs[i]] = {}
+                        if glyphs[i-1] in previous[glyphs[i]]:
+                            previous[glyphs[i]][glyphs[i-1]] += 1
+                        else:
+                            previous[glyphs[i]][glyphs[i-1]] = 1
+
+                    # Next
+                    if i < len(glyphs) - 1:
+                        if glyphs[i] not in next_:
+                            next_[glyphs[i]] = {}
+                        if glyphs[i+1] in next_[glyphs[i]]:
+                            next_[glyphs[i]][glyphs[i+1]] += 1
+                        else:
+                            next_[glyphs[i]][glyphs[i+1]] = 1
+
+    return trigrams, previous, next_
 
 
 def search_glyph(glyph, concord):
-    neighbors = [k for k in list(concord[glyph].keys())
-                 if concord[glyph][k] > 1]
-    neighbors.sort(key=lambda x: concord[glyph][x], reverse=True)
-    print('')
-    for n in neighbors:
-        freq = concord[glyph][n]
-        print(f"   {n[0]}  |  {glyph}  |  {n[1]}  ......  x{freq}")
-    print('')
+    trigrams, previous, next_ = concord
 
+    # Trigrams
+    neighbors = [k for k in list(trigrams[glyph].keys())
+                 if trigrams[glyph][k] > 1 and '000' not in k]
+    neighbors.sort(key=lambda x: trigrams[glyph][x], reverse=True)
+
+    # Previous
+    previous_glyphs = [p for p in list(previous[glyph].keys())
+                       if previous[glyph][p] > 1 and p != '000']
+    previous_glyphs.sort(key=lambda x: previous[glyph][x], reverse=True)
+
+    # Next
+    next_glyphs = [n for n in list(next_[glyph].keys())
+                   if next_[glyph][n] > 1 and n != '000']
+    next_glyphs.sort(key=lambda x: next_[glyph][x], reverse=True)
+
+    print('\nTrigrams\n')
+    for n in neighbors:
+        freq = trigrams[glyph][n]
+        print(f"   {n[0]}  |  {glyph}  |  {n[1]}  ......  x{freq}")
+    print('\nBigrams\n')
+    for p in previous_glyphs:
+        freq_p = previous[glyph][p]
+        print(f"   {p}  |  {glyph}  |       ......  x{freq_p}")
+    for n_ in next_glyphs:
+        freq_n = next_[glyph][n_]
+        print(f"        |  {glyph}  |  {n_}  ......  x{freq_n}")
 
 c = concordance(clean_data(tablets))
-search_glyph('380', c)
+search_glyph('600', c)
