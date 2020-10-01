@@ -27,7 +27,7 @@ def get_score(s):
     rel_freq = {}
     score = 0
 
-    for i in range(0, len(s) - 6, 2):
+    for i in range(0, len(s) - 4, 2):
         syls = s[i:i+4]
         nxt = s[i+4:i+6]
         if syls not in rel_freq:
@@ -36,6 +36,21 @@ def get_score(s):
             rel_freq[syls][nxt] = 0
         rel_freq[syls][nxt] += 1
 
+    for syl in rel_freq:
+        total = sum(rel_freq[syl].values())
+        for nxt in rel_freq[syl]:
+            rel_freq[syl][nxt] /= total
+
+    for syls in trigrams:
+        if syls in rel_freq:
+            for nxt in trigrams[syls]:
+                if nxt in rel_freq[syls]:
+                    score += abs(trigrams[syls][nxt] - rel_freq[syls][nxt])
+                else:
+                    score += trigrams[syls][nxt]
+        else:
+            score += 1
+
     for syls in rel_freq:
         if syls not in trigrams:
             score += 1
@@ -43,12 +58,8 @@ def get_score(s):
             for nxt in rel_freq[syls]:
                 if nxt not in trigrams[syls]:
                     score += rel_freq[syls][nxt]
-                else:
-                    score += abs(rel_freq[syls][nxt] - trigrams[syls][nxt])
 
-    score /= ((len(s) // 2) - 4)
-
-    return 1 / score
+    return (len(trigrams) - score) / (len(s) // 2)
 
 
 if __name__ == "__main__":

@@ -64,34 +64,52 @@ for syl in markov:
         markov[syl][i] /= total
 
 
-def get_score(s):
-    relative_freqs = {}
-    for i in range(0, len(s) - 4, 2):
-        syl = s[i:i+2]
-        nxt = s[i+2:i+4]
-        if syl not in relative_freqs:
-            relative_freqs[syl] = {}
-        if nxt not in relative_freqs[syl]:
-            relative_freqs[syl][nxt] = 0
-        relative_freqs[syl][nxt] += 1
+def get_syl_score(s):
+    rel = [s.count(syl) for syl in rapa_syllables]
+    total = sum(rel)
+    rel = [syl / total for syl in rel]
 
-    for syl in relative_freqs:
-        total = sum(relative_freqs[syl].values())
-        for nxt in relative_freqs[syl]:
-            relative_freqs[syl][nxt] /= total
+    delta = sum(abs(np.array(syl_freqs) - np.array(rel)))
 
+    return delta
+
+def get_bscore(s):
+    rel_freq = {}
     score = 0
 
-    for syl in relative_freqs:
-        for nxt in relative_freqs[syl]:
-            if relative_freqs[syl][nxt] in markov[syl]:
-                score += abs(relative_freqs[syl][nxt] - markov[syl][nxt])
-            else:
-                score += relative_freqs[syl][nxt]
+    for i in range(0, len(s) - 2, 2):
+        syls = s[i:i+2]
+        nxt = s[i+2:i+4]
+        if syls not in rel_freq:
+            rel_freq[syls] = {}
+        if nxt not in rel_freq[syls]:
+            rel_freq[syls][nxt] = 0
+        rel_freq[syls][nxt] += 1
 
-    score /= ((len(s) // 2) - 2)
+    for syl in rel_freq:
+        total = sum(rel_freq[syl].values())
+        for nxt in rel_freq[syl]:
+            rel_freq[syl][nxt] /= total
 
-    return 1 / score
+    for syls in markov:
+        if syls in rel_freq:
+            for nxt in markov[syls]:
+                if nxt in rel_freq[syls]:
+                    score += abs(markov[syls][nxt] - rel_freq[syls][nxt])
+                else:
+                    score += markov[syls][nxt]
+        else:
+            score += 1
+
+    for syls in rel_freq:
+        if syls not in markov:
+            score += 1
+        else:
+            for nxt in rel_freq[syls]:
+                if nxt not in markov[syls]:
+                    score += rel_freq[syls][nxt]
+
+    return (len(markov) - score) / (len(s) // 2)
 
 
 M = np.zeros((50, 50))
@@ -120,13 +138,13 @@ if __name__ == "__main__":
     plt.show()
 
     snt = ''
-    for i in range(15):
+    for i in range(50):
         snt += np.random.choice(rapa_syllables)
     
-    k = np.random.randint(0, len(crp) - 30)
+    k = np.random.randint(0, len(crp) - 100)
     if crp[k] in ['a', 'e', 'i', 'o', 'u']:
         k += 1
-    print(crp[k:k+30])
-    print(get_score(crp[k:k+30]))
+    print(crp[k:k+100])
+    print(get_bscore(crp[k:k+100]))
     print(snt)
-    print(get_score(snt))
+    print(get_bscore(snt))

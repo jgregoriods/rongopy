@@ -8,7 +8,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
 from collections import Counter
 
-from bigrams import rapa_syllables
+from bigrams import rapa_syllables, get_bscore
 from trigrams import get_score
 
 """
@@ -164,8 +164,8 @@ shuffle(syls)
 syl_map = {k: str(v) for k, v in zip(syls, list(range(50)))}
 inverted = {str(v): k for k, v in zip(syls, list(range(50)))}
 
-original = "'i'anakena'a'u'imate'a'ikotekopitika'uhenu'ahe'ahu'ahe'ake'ake'ahepu'atamahahineteremomoteremomotevakakohina'ihakakeri"
-print(get_score(original))
+original = "'etimote'ako'akohe'ako'akotena'etetuhu'etetaha'eteku'i'a'etekapakapa'etemanuva'e'eha"
+print((get_score(original) / 2) + (get_bscore(original) / 3))
 
 def encode(text, key):
     encoded = []
@@ -186,7 +186,7 @@ def decode(text, key):
 
 
 dna_pool = []
-for _ in range(100):
+for _ in range(1000):
     dna = rapa_syllables.copy()
     shuffle(dna)
     dna_pool.append(dna)
@@ -227,7 +227,7 @@ for i in range(num_iters):
         current_map = {str(k): v for k, v in zip(list(range(50)), dna)}
         decoded = decode(encoded, current_map)
 
-        score = get_score(decoded)
+        score = (get_score(decoded) / 2) + (get_bscore(decoded) / 3)
 
         dna2score['-'.join(dna)] = score
 
@@ -239,7 +239,7 @@ for i in range(num_iters):
     scores[i] = np.mean(list(dna2score.values()))
 
     sorted_dna = sorted(dna2score.items(), key=lambda x: x[1], reverse=True)
-    dna_pool = [k.split('-') for k, v in sorted_dna[:10]]
+    dna_pool = [k.split('-') for k, v in sorted_dna[:100]]
 
     if i % 100 == 0:
         print('iter:', i, 'score:', scores[i], 'best so far:', best_score)
