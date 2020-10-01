@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from bigrams import rapa_syllables, add_glottal
+from bigrams import rapa_syllables, add_glottal, crp
 
 
 trigrams = {}
@@ -89,10 +89,26 @@ def get_score(s):
     return tri_delta + bi_delta
 
 
-print(get_score("'etimote'ako'ako"))
+def get_fitness(s):
+    score = 0
 
-snt = ''
-for i in range(5):
-    snt += np.random.choice(rapa_syllables)
-print(snt)
-print(get_score(snt))
+    for i in range(0, len(s) - 4, 2):
+        syl = s[i:i+6]
+
+        if syl in trigrams:
+            score += np.log(trigrams[syl])
+
+    return 1 - np.exp(score / len(s) / 2)
+
+
+if __name__ == "__main__":
+    k = np.random.randint(0, len(crp) - 100)
+    if crp[k] in ['a', 'e', 'i', 'o', 'u']:
+        k += 1
+    snt = ''
+    for i in range(50):
+        snt += np.random.choice(rapa_syllables)
+    print(crp[k:k+100])
+    print(get_fitness(crp[k:k+100]))
+    print(snt)
+    print(get_fitness(snt))

@@ -8,8 +8,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
 from collections import Counter
 
-from bigrams import rapa_syllables, get_bscore
-from trigrams import get_score
+from bigrams import rapa_syllables
+from fitness import get_fitness
 
 """
 rapa_words = []
@@ -164,8 +164,8 @@ shuffle(syls)
 syl_map = {k: str(v) for k, v in zip(syls, list(range(50)))}
 inverted = {str(v): k for k, v in zip(syls, list(range(50)))}
 
-original = "'etimote'ako'akohe'ako'akotena'etetuhu'etetaha'eteku'i'a'etekapakapa'etemanuva'e'eha"
-print((get_score(original) / 2) + (get_bscore(original) / 3))
+original = "'a'ure'a'ohovehikihaho'ena'ohovehinu'ina'otito'okumatu'a'ero'amarego'eka'itagatamohatu'o'o'u'e'ure'e"
+print(get_fitness(original))
 
 def encode(text, key):
     encoded = []
@@ -186,7 +186,7 @@ def decode(text, key):
 
 
 dna_pool = []
-for _ in range(1000):
+for _ in range(100000):
     dna = rapa_syllables.copy()
     shuffle(dna)
     dna_pool.append(dna)
@@ -219,7 +219,11 @@ print(encoded)
 for i in range(num_iters):
     if i > 0:
         # Get offspring
-        dna_pool = evolve_offspring(dna_pool, 10)
+        dna_pool = evolve_offspring(dna_pool, 2)
+        for _ in range(50000):
+            dna = rapa_syllables.copy()
+            shuffle(dna)
+            dna_pool.append(dna)
 
     dna2score = {}
 
@@ -227,7 +231,7 @@ for i in range(num_iters):
         current_map = {str(k): v for k, v in zip(list(range(50)), dna)}
         decoded = decode(encoded, current_map)
 
-        score = (get_score(decoded) / 2) + (get_bscore(decoded) / 3)
+        score = get_fitness(decoded)
 
         dna2score['-'.join(dna)] = score
 
@@ -239,7 +243,7 @@ for i in range(num_iters):
     scores[i] = np.mean(list(dna2score.values()))
 
     sorted_dna = sorted(dna2score.items(), key=lambda x: x[1], reverse=True)
-    dna_pool = [k.split('-') for k, v in sorted_dna[:100]]
+    dna_pool = [k.split('-') for k, v in sorted_dna[:25000]]
 
     if i % 100 == 0:
         print('iter:', i, 'score:', scores[i], 'best so far:', best_score)
@@ -247,4 +251,10 @@ for i in range(num_iters):
 
 plt.plot(scores)
 plt.show()
-print(decode(encoded, best_map))
+dcd = decode(encoded, best_map)
+for i in range(len(dcd)):
+    if dcd[i] == original[i]:
+        print(dcd[i], end='')
+    else:
+        print('*', end='')
+print('')

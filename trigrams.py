@@ -63,13 +63,13 @@ def get_score(s):
 
 
 if __name__ == "__main__":
-    k = np.random.randint(0, len(crp) - 10)
+    k = np.random.randint(0, len(crp) - 100)
     if crp[k] in ['a', 'e', 'i', 'o', 'u']:
         k += 1
     snt = ''
-    for i in range(5):
+    for i in range(50):
         snt += np.random.choice(rapa_syllables)
-    print(crp[k:k+10])
-    print(get_score(crp[k:k+10]))
+    print(crp[k:k+100])
+    print(get_score(crp[k:k+100]))
     print(snt)
     print(get_score(snt))
