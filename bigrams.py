@@ -136,15 +136,3 @@ if __name__ == "__main__":
     ax1.set_xticklabels(rapa_syllables)
 
     plt.show()
-
-    snt = ''
-    for i in range(50):
-        snt += np.random.choice(rapa_syllables)
-    
-    k = np.random.randint(0, len(crp) - 100)
-    if crp[k] in ['a', 'e', 'i', 'o', 'u']:
-        k += 1
-    print(crp[k:k+100])
-    print(get_bscore(crp[k:k+100]))
-    print(snt)
-    print(get_bscore(snt))
