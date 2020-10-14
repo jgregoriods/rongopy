@@ -110,10 +110,10 @@ rapa_syllables = ["'a", "'e", "'i", "'o", "'u",
                   'ra', 're', 'ri', 'ro', 'ru',
                   'ma', 'me', 'mi', 'mo', 'mu',
                   'na', 'ne', 'ni', 'no', 'nu',
-                  'ga', 'ge', 'gi', 'go',
+                  'ga', 'ge', 'gi', 'go', 'gu',
                   'ha', 'he', 'hi', 'ho', 'hu',
                   'pa', 'pe', 'pi', 'po', 'pu',
-                  'va', 've', 'vi', 'vo']
+                  'va', 've', 'vi', 'vo', 'vu']
 
 syl_indices = {k: v for k, v in zip(rapa_syllables, list(range(48)))}
 

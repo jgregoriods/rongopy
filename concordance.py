@@ -29,7 +29,6 @@ concordance = get_concordance(tablets)
 concordance_clean = get_concordance(tablets_clean)
 concordance_simple = get_concordance(tablets_simple)
 
-
 bigram_matrix = np.zeros((51, 51))
 
 glyph_counts = get_glyph_counts(tablets_clean)
