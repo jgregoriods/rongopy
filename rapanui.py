@@ -47,3 +47,33 @@ syl_sums = syl_matrix.sum(axis=1)
 for i in range(len(syl_matrix)):
     if syl_sums[i] > 0:
         syl_matrix[i] /= syl_sums[i]
+
+# Prepare corpus for LSTM
+
+real_rapanui = []
+fake_rapanui = []
+
+raw_shuffled = pd.read_csv('language/shuffled.txt', header=None).values
+shuffled = [i[0] for i in raw_shuffled]
+
+max_len = 50  # max number of syllables
+
+for verse in corpus:
+    line = []
+    for i in range(0, len(verse), 2):
+        line.append(verse[i:i+2])
+        if len(line) >= max_len:
+            real_rapanui.append([' '.join(line)])
+            line = []
+    if line:
+        real_rapanui.append([' '.join(line)])
+
+for verse in shuffled:
+    line = []
+    for i in range(0, len(verse), 2):
+        line.append(verse[i:i+2])
+        if len(line) >= max_len:
+            fake_rapanui.append([' '.join(line)])
+            line = []
+    if line:
+        fake_rapanui.append([' '.join(line)])

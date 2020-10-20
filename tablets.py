@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from glyphmap import glyphmap, appendages
+from glyphmap import glyphmap, appendages, feathered
 
 
 def clean_line(line, keep_adorn=False):
@@ -21,6 +21,8 @@ def clean_line(line, keep_adorn=False):
                         cleaned_glyph += 'o'
                     if 's' in stacked_glyph:
                         cleaned_glyph += 's'
+                    if 'f' in stacked_glyph and cleaned_glyph not in feathered:
+                        cleaned_glyph += 'f'
                 clean.append(cleaned_glyph)
         else:
             cleaned_glyph = ''.join([c for c in glyph if c.isdigit()]).zfill(3)
@@ -29,6 +31,8 @@ def clean_line(line, keep_adorn=False):
                     cleaned_glyph += 'o'
                 if 's' in glyph:
                     cleaned_glyph += 's'
+                if 'f' in glyph and cleaned_glyph not in feathered:
+                    cleaned_glyph += 'f'
             clean.append(cleaned_glyph)
     return '-'.join(clean)
 
@@ -40,7 +44,7 @@ def simplify(line):
             simple.append(glyphmap[glyph[:3]])
         else:
             simple.append(glyph[:3])
-        for letter in 'os':
+        for letter in 'osf':
             if letter in glyph:
                 simple.append(letter)
     return simple
@@ -77,4 +81,6 @@ for tablet in tablets_simple:
                 elif glyph == 's':
                     tablets_simple[tablet][line][i] = appendages[tablet]['s'][s_counter]
                     s_counter += 1
+                elif glyph == 'f':
+                    tablets_simple[tablet][line][i] = '003'
         tablets_simple[tablet][line] = '-'.join(tablets_simple[tablet][line])
