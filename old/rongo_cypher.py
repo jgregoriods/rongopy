@@ -6,10 +6,12 @@ from sklearn.svm import SVC, LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
+from tensorflow import keras
 from collections import Counter
 
 from bigrams import rapa_syllables
-from fitness import get_fitness
+from lstm import preprocess
+#from fitness import get_fitness
 
 """
 rapa_words = []
@@ -164,6 +166,16 @@ shuffle(syls)
 syl_map = {k: str(v) for k, v in zip(syls, list(range(50)))}
 inverted = {str(v): k for k, v in zip(syls, list(range(50)))}
 
+model = keras.load_model('../lstm_model')
+
+def get_fitness(line):
+    syls = []
+    for i in range(0, len(line), 2):
+        syls.append(line[i:i+2])
+    syls = [' '.join(syls)]
+    return model.predict(syls)[0]
+
+
 original = "'a'ure'a'ohovehikihaho'ena'ohovehinu'ina'otito'okumatu'a'ero'amarego'eka'itagatamohatu'o'o'u'e'ure'e"
 print(get_fitness(original))
 
@@ -186,7 +198,7 @@ def decode(text, key):
 
 
 dna_pool = []
-for _ in range(100000):
+for _ in range(100):
     dna = rapa_syllables.copy()
     shuffle(dna)
     dna_pool.append(dna)
