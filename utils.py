@@ -1,40 +1,60 @@
+import pandas as pd
+
 from rapanui import syllables, corpus
 from stats import get_syl_counts, get_glyph_counts
 from tablets import tablets_simple
-from random import shuffle
+from random import shuffle, choice
 
 
-all_syls = get_syl_counts(corpus)
-syls = list(all_syls.keys())
-syls.sort(key=lambda x: all_syls[x], reverse=True)
-
-all_glyphs = get_glyph_counts(tablets_simple)
-glyphs = list(all_glyphs.keys())
-glyphs.sort(key=lambda x: all_glyphs[x], reverse=True)
-
-
-key = {glyphs[i]: syls[i] for i in range(len(syls))}
-
-
-def decode(line, key):
-    decoded = []
-    glyphs = line.split('-')
-    for glyph in glyphs:
-        if glyph in key:
-            decoded.append(key[glyph])
-        else:
-            decoded.append(glyph)
-    return '-'.join(decoded)
-
-
-def make_random_line(line):
+def make_crypto_line(line):
     random_key = {}
-    syls_cp = syls.copy()
+    syls_cp = syllables.copy()
     shuffle(syls_cp)
-    for i in range(len(syls)):
-        random_key[syls[i]] = syls_cp[i]
+    for i in range(len(syllables)):
+        random_key[syllables[i]] = syls_cp[i]
     crypto_line = []
     for i in range(0, len(line), 2):
         crypto_line.append(random_key[line[i:i+2]])
     return ''.join(crypto_line)
 
+
+def make_shuffled_line(line):
+    shuffled_line = []
+    for i in range(0, len(line), 2):
+        shuffled_line.append(line[i:i+2])
+    shuffle(shuffled_line)
+    return ''.join(shuffled_line)
+
+
+def make_random_line(line):
+    random_line = []
+    for i in range(0, len(line), 2):
+        random_line.append(choice(syllables))
+    return ''.join(random_line)
+
+
+def create_pseudo_corpus(corpus):
+    random_corpus = []
+    crypto_corpus = []
+    shuffled_corpus = []
+    for verse in corpus:
+        random_corpus.append(make_random_line(verse))
+        crypto_corpus.append(make_crypto_line(verse))
+        shuffled_corpus.append(make_shuffled_line(verse))
+    pd.DataFrame(random_corpus).to_csv('random.txt', header=None, index=None)
+    pd.DataFrame(crypto_corpus).to_csv('crypto.txt', header=None, index=None)
+    pd.DataFrame(shuffled_corpus).to_csv('shuffled.txt', header=None, index=None)
+
+
+def decode_tablets(tablets, key):
+    decoded = []
+    for tablet in tablets:
+        for line in tablets[tablet]:
+            decoded_line = []
+            for glyph in tablets[tablet][line].split('-'):
+                if glyph in key:
+                    decoded_line.append(key[glyph])
+                elif len(decoded_line) >= 10:
+                    decoded.append(' '.join(decoded_line))
+                    decoded_line = []
+    return decoded

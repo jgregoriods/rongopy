@@ -5,7 +5,10 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Embedding, Dense, LSTM, Dropout, Bidirectional
+
 from sklearn.utils import shuffle
+from sklearn.svm import LinearSVC
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from rapanui import corpus
 
@@ -14,13 +17,36 @@ MAX_LEN = 50  # max number of syllables per verse
 NUM_SYLS = 50
 
 real_rapanui = []
-fake_rapanui = []
-
-#raw_shuffled = pd.read_csv('language/shuffled.txt', header=None).values
-#shuffled = [i[0] for i in raw_shuffled]
+random_rapanui = []
+#shuffled_rapanui = []
+crypto_rapanui = []
 
 raw_random = pd.read_csv('language/random.txt', header=None).values
 random_txt = [i[0] for i in raw_random]
+
+#raw_shuffled = pd.read_csv('language/shuffled.txt', header=None).values
+#shuffled_txt = [i[0] for i in raw_shuffled]
+
+raw_crypto = pd.read_csv('language/crypto.txt', header=None).values
+crypto_txt = [i[0] for i in raw_crypto]
+
+
+def separate_syllables(raw_corpus, new_list):
+    for verse in raw_corpus:
+        line = []
+        for i in range(0, len(verse), 2):
+            line.append(verse[i:i+2])
+            if len(line) >= MAX_LEN:
+                new_list.append([' '.join(line)])
+                line = []
+        new_list.append([' '.join(line)])
+    return new_list
+
+
+separate_syllables(corpus, real_rapanui)
+separate_syllables(random_txt, random_rapanui)
+#separate_syllables(shuffled_txt, shuffled_rapanui)
+separate_syllables(crypto_txt, crypto_rapanui)
 
 for verse in corpus:
     line = []
@@ -29,27 +55,22 @@ for verse in corpus:
         if len(line) >= MAX_LEN:
             real_rapanui.append([' '.join(line)])
             line = []
-    if len(line) >= 10:
-        real_rapanui.append([' '.join(line)])
-
-for verse in random_txt:
-    line = []
-    for i in range(0, len(verse), 2):
-        line.append(verse[i:i+2])
-        if len(line) >= MAX_LEN:
-            fake_rapanui.append([' '.join(line)])
-            line = []
-    if len(line) >= 10:
-        fake_rapanui.append([' '.join(line)])
+    real_rapanui.append([' '.join(line)])
 
 
 real = pd.DataFrame(real_rapanui, columns=['text'])
 real['label'] = 0
 
-fake = pd.DataFrame(fake_rapanui, columns=['text'])
-fake['label'] = 1
+rnd = pd.DataFrame(random_rapanui, columns=['text'])
+rnd['label'] = 1
 
-all_texts = pd.concat([real, fake], ignore_index=True)
+#shf = pd.DataFrame(shuffled_rapanui, columns=['text'])
+#shf['label'] = 2
+
+crp = pd.DataFrame(crypto_rapanui, columns=['text'])
+crp['label'] = 2
+
+all_texts = pd.concat([real, rnd, crp], ignore_index=True)
 all_texts = shuffle(all_texts)
 all_texts.reset_index(inplace=True)
 
@@ -63,6 +84,14 @@ y_train = labels[:training_size]
 
 X_test = texts[training_size:]
 y_test = labels[training_size:]
+
+#####
+tfidf_vect_ngram_chars = TfidfVectorizer(ngram_range=(2,4), max_features=50)
+tfidf_vect_ngram_chars.fit(texts)
+xtrain_tfidf_ngram_chars = tfidf_vect_ngram_chars.transform(texts)
+linear_svc = LinearSVC()
+linear_svc.fit(X_train, y_train)
+#####
 
 tokenizer = Tokenizer(num_words=NUM_SYLS, oov_token='<OOV>')
 tokenizer.fit_on_texts(real['text'])
@@ -82,37 +111,22 @@ def preprocess(line):
                                 padding='post', truncating='post')
     return line_padded
 
-"""
-model = Sequential()
-
-model.add(Embedding(NUM_SYLS, 32))
-model.add(LSTM(32, activation='relu'))
-model.add(Dropout(0.2))
-model.add(BatchNormalization())
-
-model.add(Dense(64, activation='relu'))
-model.add(Dropout(0.2))
-model.add(BatchNormalization())
-
-model.add(Dense(64, activation='relu'))
-model.add(Dropout(0.2))
-model.add(BatchNormalization())
-
-model.add(Dense(2, activation='softmax'))
-"""
 
 if __name__ == '__main__':
+    """
     model = Sequential([
         Embedding(NUM_SYLS, 32),
         Bidirectional(LSTM(64)),
         Dropout(0.2),
-        Dense(2, activation='softmax')
+        Dense(3, activation='softmax')
     ])
 
     model.compile(loss='sparse_categorical_crossentropy', optimizer='adam',
                   metrics=['accuracy'])
 
-    model.fit(X_train_padded, y_train, epochs=5,
+    model.fit(X_train_padded, y_train, epochs=100,
               validation_data=(X_test_padded, y_test))
 
     model.save('lstm_model')
+    """
+    print('Score:', linear_svc.score(X_test, y_test))
