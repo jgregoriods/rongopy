@@ -44,17 +44,3 @@ def create_pseudo_corpus(corpus):
     pd.DataFrame(random_corpus).to_csv('random.txt', header=None, index=None)
     pd.DataFrame(crypto_corpus).to_csv('crypto.txt', header=None, index=None)
     pd.DataFrame(shuffled_corpus).to_csv('shuffled.txt', header=None, index=None)
-
-
-def decode_tablets(tablets, key):
-    decoded = []
-    for tablet in tablets:
-        for line in tablets[tablet]:
-            decoded_line = []
-            for glyph in tablets[tablet][line].split('-'):
-                if glyph in key:
-                    decoded_line.append(key[glyph])
-                elif len(decoded_line) >= 10:
-                    decoded.append(' '.join(decoded_line))
-                    decoded_line = []
-    return decoded

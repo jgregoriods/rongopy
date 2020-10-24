@@ -38,6 +38,8 @@ for line in corpus:
     for i in range(0, len(line) - 2, 2):
         syl = line[i:i+2]
         nxt = line[i+2:i+4]
+        if syl not in syllables or nxt not in syllables:
+            print(line)
         j = syllables.index(syl)
         k = syllables.index(nxt)
         syl_matrix[j, k] += 1
