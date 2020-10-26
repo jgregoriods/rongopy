@@ -59,19 +59,16 @@ class Genome:
     def get_score(self):
         key = {glyphs[i]: self.genes[i] for i in range(len(syls))}
         decoded = decode_tablets(tablets_simple, key)
-        #self.score = get_fitness(decoded)
         return get_fitness(decoded)
 
     def mutate(self):
-        # new_genes = self.genes.copy()
-        i = randint(0, len(syls) - 2)
-        self.genes[i], self.genes[i+1] = self.genes[i+1], self.genes[i]
+        if random() < 0.25:
+            i = randint(0, len(syls) - 3)
+            self.genes[i], self.genes[i+2] = self.genes[i+2], self.genes[i]
+        else:
+            i = randint(0, len(syls) - 2)
+            self.genes[i], self.genes[i+1] = self.genes[i+1], self.genes[i]
         self.score = self.get_score()
-        #new_genes[i], new_genes[i+1] = new_genes[i+1], new_genes[i]
-        #new_score = self.get_score(new_genes)
-        #if new_score > self.score:
-        #    self.genes = new_genes
-        #    self.score = new_score
 
 
 class GeneticAlgorithm:
@@ -118,8 +115,8 @@ class GeneticAlgorithm:
 
 
 if __name__ == '__main__':
-    ga = GeneticAlgorithm(pop_size=1000, n_parents=200, n_children=2,
-                          prob_mut=0.2)
-    ga.evolve(50)
+    ga = GeneticAlgorithm(pop_size=100, n_parents=20, n_children=2,
+                          prob_mut=1)
+    ga.evolve(20)
     print(ga.best_key)
     pickle.dump(ga, open('ga.pickle', 'wb'))
