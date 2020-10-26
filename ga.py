@@ -80,17 +80,14 @@ class GeneticAlgorithm:
         self.prob_mut = prob_mut
         self.n_parents = n_parents
         self.n_children = n_children
-        self.genomes = [Genome() for i in range(self.pop_size)]
-        # self.get_scores(self.genomes)
+        self.genomes = [Genome()]
+        self.std_score = self.genomes[0].score
+        self.genomes += [Genome(score=self.std_score)
+                         for i in range(self.pop_size - 1)]
         self.genomes.sort(key=lambda x: x.score, reverse=True)
         self.max_scores = [self.genomes[0].score]
         self.avg_scores = [np.mean([genome.score for genome in self.genomes])]
         self.best_key = {}
-
-    # def get_scores(self, genomes):
-    #     print('Calculating scores')
-    #     for genome in tqdm(genomes):
-    #         genome.get_score()
 
     def evolve(self, generations):
         print('\nEvolving')
@@ -101,12 +98,13 @@ class GeneticAlgorithm:
             for parent in tqdm(parents):
                 for i in range(self.n_children):
                     child = Genome(parent.genes, parent.score)
-                    if random() < self.prob_mut:
-                        child.mutate()
                     children.append(child)
+            while len(children) < self.pop_size - self.n_parents:
+                children.append(Genome(score=self.std_score))
+            for genome in tqdm(children):
+                if random() < self.prob_mut:
+                    genome.mutate()
             self.genomes = parents + children
-            for i in tqdm(range(self.pop_size - (len(self.genomes)))):
-                self.genomes.append(Genome())
             self.genomes.sort(key=lambda x: x.score, reverse=True)
             self.max_scores.append(self.genomes[0].score)
             self.avg_scores.append(np.mean([genome.score
