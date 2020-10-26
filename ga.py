@@ -75,10 +75,11 @@ class Genome:
 
 
 class GeneticAlgorithm:
-    def __init__(self, pop_size, n_parents, prob_mut):
+    def __init__(self, pop_size, n_parents, n_children, prob_mut):
         self.pop_size = pop_size
         self.prob_mut = prob_mut
         self.n_parents = n_parents
+        self.n_children = n_children
         self.genomes = [Genome() for i in range(self.pop_size)]
         # self.get_scores(self.genomes)
         self.genomes.sort(key=lambda x: x.score, reverse=True)
@@ -97,16 +98,15 @@ class GeneticAlgorithm:
             print(f'\n================== Generation {i+1} ==================')
             parents = self.genomes[:self.n_parents]
             children = []
-            while len(children) < self.pop_size - self.n_parents:
-                for parent in tqdm(parents):
+            for parent in tqdm(parents):
+                for i in range(self.n_children):
                     child = Genome(parent.genes, parent.score)
                     if random() < self.prob_mut:
                         child.mutate()
                     children.append(child)
-            # self.get_scores(children)
             self.genomes = parents + children
-            # for genome in tqdm(self.genomes):
-            #     genome.mutate()
+            for i in tqdm(range(self.pop_size - (len(self.genomes)))):
+                self.genomes.append(Genome())
             self.genomes.sort(key=lambda x: x.score, reverse=True)
             self.max_scores.append(self.genomes[0].score)
             self.avg_scores.append(np.mean([genome.score
@@ -120,7 +120,8 @@ class GeneticAlgorithm:
 
 
 if __name__ == '__main__':
-    ga = GeneticAlgorithm(pop_size=1000, n_parents=200, prob_mut=0.2)
-    ga.evolve(100)
+    ga = GeneticAlgorithm(pop_size=1000, n_parents=200, n_children=2,
+                          prob_mut=0.2)
+    ga.evolve(50)
     print(ga.best_key)
     pickle.dump(ga, open('ga.pickle', 'wb'))
