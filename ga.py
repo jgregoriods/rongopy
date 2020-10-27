@@ -62,25 +62,23 @@ class Genome:
         return get_fitness(decoded)
 
     def mutate(self):
-        if random() < 0.25:
-            i = randint(0, len(syls) - 3)
-            self.genes[i], self.genes[i+2] = self.genes[i+2], self.genes[i]
-        else:
-            i = randint(0, len(syls) - 2)
-            self.genes[i], self.genes[i+1] = self.genes[i+1], self.genes[i]
+        for i in range(np.random.poisson(0.5) + 1):
+            j = np.random.poisson(0.5) + 1
+            k = randint(0, len(self.genes) - (j+1))
+            self.genes[k], self.genes[k+j] = self.genes[k+j], self.genes[k]
         self.score = self.get_score()
 
 
 class GeneticAlgorithm:
-    def __init__(self, pop_size, n_parents, n_children, prob_mut):
+    def __init__(self, pop_size, n_parents, prob_mut):
         self.pop_size = pop_size
         self.prob_mut = prob_mut
         self.n_parents = n_parents
-        self.n_children = n_children
-        self.genomes = [Genome()]
-        self.std_score = self.genomes[0].score
-        self.genomes += [Genome(score=self.std_score)
-                         for i in range(self.pop_size - 1)]
+        self.n_children = pop_size // n_parents
+        self.genomes = [Genome() for i in range(self.pop_size)]
+        # self.std_score = self.genomes[0].score
+        # self.genomes += [Genome(score=self.std_score)
+        #                  for i in range(self.pop_size - 1)]
         self.genomes.sort(key=lambda x: x.score, reverse=True)
         self.max_scores = [self.genomes[0].score]
         self.avg_scores = [np.mean([genome.score for genome in self.genomes])]
@@ -95,12 +93,14 @@ class GeneticAlgorithm:
             for parent in tqdm(parents):
                 for i in range(self.n_children):
                     child = Genome(parent.genes, parent.score)
+                    if random() < self.prob_mut:
+                        child.mutate()
                     children.append(child)
-            while len(children) < self.pop_size - self.n_parents:
-                children.append(Genome(score=self.std_score))
-            for genome in tqdm(children):
-                if random() < self.prob_mut:
-                    genome.mutate()
+            # while len(children) < self.pop_size - self.n_parents:
+            #     children.append(Genome(score=self.std_score))
+            # for genome in tqdm(children):
+            #     if random() < self.prob_mut:
+            #         genome.mutate()
             self.genomes = parents + children
             self.genomes.sort(key=lambda x: x.score, reverse=True)
             self.max_scores.append(self.genomes[0].score)
@@ -115,8 +115,7 @@ class GeneticAlgorithm:
 
 
 if __name__ == '__main__':
-    ga = GeneticAlgorithm(pop_size=100, n_parents=20, n_children=2,
-                          prob_mut=1)
-    ga.evolve(20)
+    ga = GeneticAlgorithm(pop_size=1000, n_parents=200, prob_mut=0.2)
+    ga.evolve(100)
     print(ga.best_key)
     pickle.dump(ga, open('ga.pickle', 'wb'))
