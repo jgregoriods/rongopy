@@ -53,7 +53,9 @@ def get_fitness(decoded):
 
 class Genome:
     def __init__(self, genes=None, score=None):
-        self.genes = genes or syls.copy()
+        rnd_syls = syls.copy()
+        #shuffle(rnd_syls)
+        self.genes = genes or rnd_syls
         self.score = score or self.get_score()
 
     def get_score(self):
@@ -70,32 +72,56 @@ class Genome:
 
 
 class GeneticAlgorithm:
-    def __init__(self, pop_size, n_parents, prob_mut):
+    def __init__(self, pop_size, n_parents, prob_cross, prob_mut):
         self.pop_size = pop_size
+        self.prob_cross = prob_cross
         self.prob_mut = prob_mut
         self.n_parents = n_parents
-        self.n_children = pop_size // n_parents
-        self.genomes = [Genome() for i in range(self.pop_size)]
+        self.n_children = pop_size // n_parents * 2
+        # self.genomes = [Genome() for i in range(self.pop_size)]
+        self.genomes = [Genome()]
         # self.std_score = self.genomes[0].score
-        # self.genomes += [Genome(score=self.std_score)
-        #                  for i in range(self.pop_size - 1)]
+        self.genomes += [Genome(score=self.genomes[0].score)
+                         for i in range(self.pop_size - 1)]
         self.genomes.sort(key=lambda x: x.score, reverse=True)
         self.max_scores = [self.genomes[0].score]
         self.avg_scores = [np.mean([genome.score for genome in self.genomes])]
         self.best_key = {}
+    
+    def crossover(self, parent1, parent2):
+        new_genome = parent1.copy()
+        i = randint(0, len(parent1) - 1)
+        pos = parent2.index(new_genome[i])
+        new_genome[pos], new_genome[i] = new_genome[i], new_genome[pos]
+        return new_genome
 
     def evolve(self, generations):
         print('\nEvolving')
         for i in range(generations):
-            print(f'\n================== Generation {i+1} ==================')
+            print(f'\n================= Generation {i+1} =================')
             parents = self.genomes[:self.n_parents]
+            shuffle(parents)
             children = []
-            for parent in tqdm(parents):
+
+            for i in tqdm(range(0, len(parents), 2)):
+                parent1 = parents[i]
+                parent2 = parents[i+1]
                 for i in range(self.n_children):
-                    child = Genome(parent.genes, parent.score)
-                    if random() < self.prob_mut:
-                        child.mutate()
-                    children.append(child)
+                    if random() < self.prob_cross:
+                        new_genes = self.crossover(parent1.genes, parent2.genes)
+                        child = Genome(new_genes)
+                        children.append(child)
+                    else:
+                        child = Genome(parent1.genes, parent1.score)
+                        if random() < self.prob_mut:
+                            child.mutate()
+                        children.append(child)
+            # for parent in tqdm(parents):
+            #     for i in range(self.n_children):
+            #         child = Genome(parent.genes, parent.score)
+            #         if random() < self.prob_mut:
+            #             child.mutate()
+            #         children.append(child)
             # while len(children) < self.pop_size - self.n_parents:
             #     children.append(Genome(score=self.std_score))
             # for genome in tqdm(children):
@@ -115,7 +141,7 @@ class GeneticAlgorithm:
 
 
 if __name__ == '__main__':
-    ga = GeneticAlgorithm(pop_size=1000, n_parents=200, prob_mut=0.2)
+    ga = GeneticAlgorithm(pop_size=100, n_parents=20, prob_cross=0.8, prob_mut=0.2)
     ga.evolve(100)
     print(ga.best_key)
     pickle.dump(ga, open('ga.pickle', 'wb'))
