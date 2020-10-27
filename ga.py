@@ -53,7 +53,7 @@ def get_fitness(decoded):
 
 class Genome:
     def __init__(self, genes=None, score=None):
-        # rnd_syls = syls.copy()
+        rnd_syls = syls.copy()
         shuffle(rnd_syls)
         self.genes = genes or rnd_syls
         self.score = score or self.get_score()
