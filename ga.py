@@ -72,12 +72,14 @@ class Genome:
 
 
 class GeneticAlgorithm:
-    def __init__(self, pop_size, n_parents, prob_cross, prob_mut):
+    def __init__(self, pop_size, n_parents, n_elite, prob_cross, prob_mut):
         self.pop_size = pop_size
+        self.n_parents = n_parents
+        self.n_elite = n_elite
+        self.n_children = pop_size // n_parents * 2
         self.prob_cross = prob_cross
         self.prob_mut = prob_mut
-        self.n_parents = n_parents
-        self.n_children = pop_size // n_parents * 2
+
         self.genomes = [Genome() for i in tqdm(range(self.pop_size))]
         # self.genomes = [Genome()]
         # self.std_score = self.genomes[0].score
@@ -87,15 +89,6 @@ class GeneticAlgorithm:
         self.max_scores = [self.genomes[0].score]
         self.avg_scores = [np.mean([genome.score for genome in self.genomes])]
         self.best_key = {}
-
-    """
-    def crossover(self, parent1, parent2):
-        new_genome = parent1.genes.copy()
-        i = randint(0, len(parent1.genes) - 1)
-        pos = parent2.genes.index(new_genome[i])
-        new_genome[pos], new_genome[i] = new_genome[i], new_genome[pos]
-        return new_genome
-    """
 
     def orx(self, parent1, parent2):
         i = randint(0, len(parent1) - 1)
@@ -130,10 +123,10 @@ class GeneticAlgorithm:
         print('\nEvolving')
         for i in range(generations):
             print(f'\n================= Generation {i+1} =================')
+            elite = self.genomes[:self.n_elite]
             parents = self.genomes[:self.n_parents]
             shuffle(parents)
             children = []
-
             for i in tqdm(range(0, len(parents), 2)):
                 parent1 = parents[i]
                 parent2 = parents[i+1]
@@ -147,19 +140,9 @@ class GeneticAlgorithm:
                         if random() < self.prob_mut:
                             child.mutate()
                         children.append(child)
-            # for parent in tqdm(parents):
-            #     for i in range(self.n_children):
-            #         child = Genome(parent.genes, parent.score)
-            #         if random() < self.prob_mut:
-            #             child.mutate()
-            #         children.append(child)
-            # while len(children) < self.pop_size - self.n_parents:
-            #     children.append(Genome(score=self.std_score))
-            # for genome in tqdm(children):
-            #     if random() < self.prob_mut:
-            #         genome.mutate()
-            self.genomes = parents + children
+            self.genomes = elite + children
             self.genomes.sort(key=lambda x: x.score, reverse=True)
+            self.genomes = self.genomes[:self.pop_size]
             self.max_scores.append(self.genomes[0].score)
             self.avg_scores.append(np.mean([genome.score
                                             for genome in self.genomes]))
@@ -172,8 +155,8 @@ class GeneticAlgorithm:
 
 
 if __name__ == '__main__':
-    ga = GeneticAlgorithm(pop_size=500, n_parents=200, prob_cross=0.8,
-                          prob_mut=0.2)
+    ga = GeneticAlgorithm(pop_size=500, n_parents=200, n_elite=50,
+                          prob_cross=0.8, prob_mut=0.2)
     ga.evolve(100)
     print(ga.best_key)
     pickle.dump(ga, open('ga.pickle', 'wb'))
