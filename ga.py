@@ -3,6 +3,7 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
+from math import ceil
 from random import shuffle, random, randint
 from tqdm import tqdm
 
@@ -52,23 +53,31 @@ def get_fitness(decoded):
 
 
 class Genome:
-    def __init__(self, genes=None, score=None):
+    def __init__(self, genes=None, score=None, freq=False):
         rnd_syls = syls.copy()
-        shuffle(rnd_syls)
+        if not freq:
+            shuffle(rnd_syls)
+        self.freq = freq
         self.genes = genes or rnd_syls
-        self.score = score or self.get_score()
+        self.score = score
 
     def get_score(self):
         key = {glyphs[i]: self.genes[i] for i in range(len(syls))}
         decoded = decode_tablets(tablets_simple, key)
-        return get_fitness(decoded)
+        self.score = get_fitness(decoded)
 
     def mutate(self):
-        for i in range(np.random.poisson(0.5) + 1):
-            j = np.random.poisson(0.5) + 1
-            k = randint(0, len(self.genes) - (j+1))
-            self.genes[k], self.genes[k+j] = self.genes[k+j], self.genes[k]
-        self.score = self.get_score()
+        if self.freq:
+            for i in range(np.random.poisson(0.5) + 1):
+                j = np.random.poisson(0.5) + 1
+                k = randint(0, len(self.genes) - (j+1))
+                self.genes[k], self.genes[k+j] = self.genes[k+j], self.genes[k]
+        else:
+            for i in range(np.random.poisson(0.5) + 1):
+                j, k = np.random.choice([i for i in range(len(self.genes) - 1)], 2, False)
+                self.genes[j], self.genes[k] = self.genes[k], self.genes[j]
+        self.score = None
+        # self.score = self.get_score()
 
 
 class GeneticAlgorithm:
@@ -76,11 +85,14 @@ class GeneticAlgorithm:
         self.pop_size = pop_size
         self.n_parents = n_parents
         self.n_elite = n_elite
-        self.n_children = pop_size // n_parents * 2
+        self.n_children = ceil(pop_size / n_parents * 2)
         self.prob_cross = prob_cross
         self.prob_mut = prob_mut
 
         self.genomes = [Genome() for i in tqdm(range(self.pop_size))]
+        for genome in self.genomes:
+            if genome.score is None:
+                genome.get_score()
         # self.genomes = [Genome()]
         # self.std_score = self.genomes[0].score
         # self.genomes += [Genome(score=self.genomes[0].score)
@@ -127,19 +139,21 @@ class GeneticAlgorithm:
             parents = self.genomes[:self.n_parents]
             shuffle(parents)
             children = []
-            for i in tqdm(range(0, len(parents), 2)):
+            for i in range(0, len(parents), 2):
                 parent1 = parents[i]
                 parent2 = parents[i+1]
                 for i in range(self.n_children):
                     if random() < self.prob_cross:
                         new_genes = self.erx(parent1.genes, parent2.genes)
                         child = Genome(new_genes)
-                        children.append(child)
                     else:
                         child = Genome(parent1.genes, parent1.score)
-                        if random() < self.prob_mut:
-                            child.mutate()
-                        children.append(child)
+                    if random() < self.prob_mut:
+                        child.mutate()
+                    children.append(child)
+            for child in tqdm(children):
+                if child.score is None:
+                    child.get_score()
             self.genomes = elite + children
             self.genomes.sort(key=lambda x: x.score, reverse=True)
             self.genomes = self.genomes[:self.pop_size]
@@ -155,8 +169,8 @@ class GeneticAlgorithm:
 
 
 if __name__ == '__main__':
-    ga = GeneticAlgorithm(pop_size=500, n_parents=200, n_elite=50,
-                          prob_cross=0.8, prob_mut=0.2)
+    ga = GeneticAlgorithm(pop_size=50, n_parents=20, n_elite=5,
+                          prob_cross=0.85, prob_mut=0.15)
     ga.evolve(100)
     print(ga.best_key)
     pickle.dump(ga, open('ga.pickle', 'wb'))
