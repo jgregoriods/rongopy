@@ -67,15 +67,8 @@ class Genome:
         self.score = get_fitness(decoded)
 
     def mutate(self):
-        if self.freq:
-            for i in range(np.random.poisson(0.5) + 1):
-                j = np.random.poisson(0.5) + 1
-                k = randint(0, len(self.genes) - (j+1))
-                self.genes[k], self.genes[k+j] = self.genes[k+j], self.genes[k]
-        else:
-            for i in range(np.random.poisson(0.5) + 1):
-                j, k = np.random.choice([i for i in range(len(self.genes) - 1)], 2, False)
-                self.genes[j], self.genes[k] = self.genes[k], self.genes[j]
+        j, k = np.random.choice([i for i in range(len(self.genes) - 1)], 2, False)
+        self.genes[j], self.genes[k] = self.genes[k], self.genes[j]
         self.score = None
         # self.score = self.get_score()
 
