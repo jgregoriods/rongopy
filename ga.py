@@ -88,12 +88,43 @@ class GeneticAlgorithm:
         self.avg_scores = [np.mean([genome.score for genome in self.genomes])]
         self.best_key = {}
 
+    """
     def crossover(self, parent1, parent2):
-        new_genome = parent1.copy()
-        i = randint(0, len(parent1) - 1)
-        pos = parent2.index(new_genome[i])
+        new_genome = parent1.genes.copy()
+        i = randint(0, len(parent1.genes) - 1)
+        pos = parent2.genes.index(new_genome[i])
         new_genome[pos], new_genome[i] = new_genome[i], new_genome[pos]
         return new_genome
+    """
+
+    def orx(self, parent1, parent2):
+        i = randint(0, len(parent1) - 1)
+        j = randint(i + 1, len(parent1))
+        segment = parent1[i:j]
+        missing = [k for k in parent2 if k not in segment]
+        pref, suff = missing[:i], missing[i:]
+        return pref + segment + suff
+
+    def erx(self, parent1, parent2):
+        nodes = {gene: set() for gene in parent1}
+        for i in range(len(parent1) - 1):
+            nodes[parent1[i]].add(parent1[i+1])
+            nodes[parent2[i]].add(parent2[i+1])
+        child = [np.random.choice([parent1[0], parent2[0]])]
+        for node in nodes:
+            if child[-1] in nodes[node]:
+                nodes[node].remove(child[-1])
+        while(len(child) < len(parent1)):
+            if nodes[child[-1]]:
+                next_node = np.random.choice(list(nodes[child[-1]]))
+            else:
+                next_node = np.random.choice([k for k in nodes.keys()
+                                              if k not in child])
+            for node in nodes:
+                if next_node in nodes[node]:
+                    nodes[node].remove(next_node)
+            child.append(next_node)
+        return child
 
     def evolve(self, generations):
         print('\nEvolving')
@@ -108,8 +139,7 @@ class GeneticAlgorithm:
                 parent2 = parents[i+1]
                 for i in range(self.n_children):
                     if random() < self.prob_cross:
-                        new_genes = self.crossover(parent1.genes,
-                                                   parent2.genes)
+                        new_genes = self.erx(parent1.genes, parent2.genes)
                         child = Genome(new_genes)
                         children.append(child)
                     else:
