@@ -82,8 +82,9 @@ class GeneticAlgorithm:
         self.prob_cross = prob_cross
         self.prob_mut = prob_mut
 
-        self.genomes = [Genome() for i in tqdm(range(self.pop_size))]
-        for genome in self.genomes:
+        print('\nInitializing population')
+        self.genomes = [Genome() for i in range(self.pop_size)]
+        for genome in tqdm(self.genomes):
             if genome.score is None:
                 genome.get_score()
         # self.genomes = [Genome()]
@@ -162,8 +163,8 @@ class GeneticAlgorithm:
 
 
 if __name__ == '__main__':
-    ga = GeneticAlgorithm(pop_size=50, n_parents=20, n_elite=5,
+    ga = GeneticAlgorithm(pop_size=250, n_parents=100, n_elite=25,
                           prob_cross=0.85, prob_mut=0.15)
-    ga.evolve(100)
+    ga.evolve(200)
     print(ga.best_key)
     pickle.dump(ga, open('ga.pickle', 'wb'))
