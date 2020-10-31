@@ -3,20 +3,24 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
+from time import time
 from math import ceil
 from random import shuffle, random, randint
 from tqdm import tqdm
 
-from tablets import tablets_simple
+from tablets import tablets_simple, tablets_clean
 from rapanui import corpus, syllables
 from stats import get_glyph_counts, get_syl_counts
 from language_models import vectorizer, preprocess
 
 
-svc = pickle.load(open('svc_model', 'rb'))
-lstm = keras.models.load_model('lstm_model')
+svc = pickle.load(open('models/svc_model', 'rb'))
+lstm = keras.models.load_model('models/lstm_model')
 
-glyph_dict = get_glyph_counts(tablets_simple)
+selected = ['A', 'B', 'C', 'D', 'E', 'G', 'N', 'P', 'R', 'S']
+tablets_subset = {k: tablets_simple[k] for k in selected}
+
+glyph_dict = get_glyph_counts(tablets_subset)
 glyphs = list(glyph_dict.keys())
 glyphs.sort(key=lambda x: glyph_dict[x], reverse=True)
 glyphs = glyphs[:50]
@@ -63,14 +67,14 @@ class Genome:
 
     def get_score(self):
         key = {glyphs[i]: self.genes[i] for i in range(len(syls))}
-        decoded = decode_tablets(tablets_simple, key)
+        decoded = decode_tablets(tablets_subset, key)
         self.score = get_fitness(decoded)
 
     def mutate(self):
-        j, k = np.random.choice([i for i in range(len(self.genes) - 1)], 2, False)
+        j, k = np.random.choice([i for i in range(len(self.genes) - 1)],
+                                size=2, replace=False)
         self.genes[j], self.genes[k] = self.genes[k], self.genes[j]
         self.score = None
-        # self.score = self.get_score()
 
 
 class GeneticAlgorithm:
@@ -83,14 +87,10 @@ class GeneticAlgorithm:
         self.prob_mut = prob_mut
 
         print('\nInitializing population')
-        self.genomes = [Genome() for i in range(self.pop_size)]
+        self.genomes = [Genome(freq=True) for i in range(self.pop_size)]
         for genome in tqdm(self.genomes):
             if genome.score is None:
                 genome.get_score()
-        # self.genomes = [Genome()]
-        # self.std_score = self.genomes[0].score
-        # self.genomes += [Genome(score=self.genomes[0].score)
-        #                  for i in range(self.pop_size - 1)]
         self.genomes.sort(key=lambda x: x.score, reverse=True)
         self.max_scores = [self.genomes[0].score]
         self.avg_scores = [np.mean([genome.score for genome in self.genomes])]
@@ -128,7 +128,7 @@ class GeneticAlgorithm:
     def evolve(self, generations):
         print('\nEvolving')
         for i in range(generations):
-            print(f'\n================= Generation {i+1} =================')
+            print(f'\nGeneration {i+1}')
             elite = self.genomes[:self.n_elite]
             parents = self.genomes[:self.n_parents]
             shuffle(parents)
@@ -163,8 +163,9 @@ class GeneticAlgorithm:
 
 
 if __name__ == '__main__':
-    ga = GeneticAlgorithm(pop_size=250, n_parents=100, n_elite=25,
-                          prob_cross=0.85, prob_mut=0.15)
-    ga.evolve(200)
+    ga = GeneticAlgorithm(pop_size=500, n_parents=200, n_elite=50,
+                          prob_cross=0.8, prob_mut=0.1)
+    ga.evolve(20)
     print(ga.best_key)
-    pickle.dump(ga, open('ga.pickle', 'wb'))
+    with open(f'ga{int(time())}.pickle', 'wb') as file:
+        pickle.dump(ga, file)

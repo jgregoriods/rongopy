@@ -11,7 +11,10 @@ syls = list(all_syls.keys())
 syls.sort(key=lambda x: all_syls[x], reverse=True)
 syl_freqs = [all_syls[syl] for syl in syls]
 
-all_glyphs = get_glyph_counts(tablets_simple)
+selected = ['A', 'B', 'C', 'D', 'E', 'G', 'N', 'P', 'R', 'S']
+tablets_subset = {k: tablets_simple[k] for k in selected}
+
+all_glyphs = get_glyph_counts(tablets_subset)
 glyphs = list(all_glyphs.keys())
 glyphs.sort(key=lambda x: all_glyphs[x], reverse=True)
 glyph_freqs = [all_glyphs[glyph] for glyph in glyphs]

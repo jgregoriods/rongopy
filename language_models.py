@@ -11,7 +11,7 @@ from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from text_prepare import real, texts, labels, MAX_LEN
+from prepare_texts import real, texts, labels, MAX_LEN
 
 
 NUM_SYLS = 50  # total number of syllables in the language
