@@ -32,17 +32,30 @@ syls.sort(key=lambda x: syl_dict[x], reverse=True)
 key = {glyphs[i]: syls[i] for i in range(len(syls))}
 
 
-def decode_tablets(tablets, key):
-    decoded = []
-    for tablet in tablets:
-        for line in tablets[tablet]:
-            decoded_line = []
-            for glyph in tablets[tablet][line].split('-'):
-                if glyph in key:
-                    decoded_line.append(key[glyph])
-                elif len(decoded_line) >= 10:
-                    decoded.append(' '.join(decoded_line))
-                    decoded_line = []
+def decode_tablets(tablets, key, keep_lines=False):
+    if keep_lines:
+        decoded = {}
+        for tablet in tablets:
+            decoded[tablet] = {}
+            for line in tablets[tablet]:
+                decoded_line = []
+                for glyph in tablets[tablet][line].split('-'):
+                    if glyph in key:
+                        decoded_line.append(key[glyph])
+                    else:
+                        decoded_line.append(glyph)
+                decoded[tablet][line] = '-'.join(decoded_line)
+    else:
+        decoded = []
+        for tablet in tablets:
+            for line in tablets[tablet]:
+                decoded_line = []
+                for glyph in tablets[tablet][line].split('-'):
+                    if glyph in key:
+                        decoded_line.append(key[glyph])
+                    elif len(decoded_line) >= 10:
+                        decoded.append(' '.join(decoded_line))
+                        decoded_line = []
     return decoded
 
 
@@ -87,7 +100,7 @@ class GeneticAlgorithm:
         self.prob_mut = prob_mut
 
         print('\nInitializing population')
-        self.genomes = [Genome(freq=True) for i in range(self.pop_size)]
+        self.genomes = [Genome() for i in range(self.pop_size)]
         for genome in tqdm(self.genomes):
             if genome.score is None:
                 genome.get_score()
@@ -163,9 +176,9 @@ class GeneticAlgorithm:
 
 
 if __name__ == '__main__':
-    ga = GeneticAlgorithm(pop_size=500, n_parents=200, n_elite=50,
+    ga = GeneticAlgorithm(pop_size=50, n_parents=20, n_elite=5,
                           prob_cross=0.8, prob_mut=0.1)
-    ga.evolve(20)
+    ga.evolve(10)
     print(ga.best_key)
     with open(f'ga{int(time())}.pickle', 'wb') as file:
         pickle.dump(ga, file)
