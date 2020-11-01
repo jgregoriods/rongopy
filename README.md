@@ -1,0 +1,11 @@
+# rongopy
+## What is rongorongo?
+<img src="img/key.png" align="left">
+<p>Rongorongo (henceforth RoR) is an undeciphered glyph system from Easter Island. The very nature of RoR as true writing is debated. In the past, the prevalent view was that the glyphs were a mnemonic device and were unrelated to the specific words of the chants they were meant to recall (Metraux, Routledge). Nowadays, most scholars assume that the system was either logographic, with a few phonetic complements (Guy, Fischer), or predominantly syllabic, with certain glyphs working as determinatives or logograms (Pozdniakov, Horley).</p>
+<p>The canonical RoR corpus is comprised of texts carved on 20 wooden tablets, one staff, two <i>reimiro</i> (pectoral adornments), one birdman sculpture (<i>tagata manu</i>), and one snuffbox (assembled from an earlier tablet). The texts are repetitive, with three tablets (H, P, Q) containing the same text. Certain sequences of glyphs, some of them quite long, appear in multiple artefacts.<p>
+<p>The only RoR passage whose meaning is thought to be understood by most scholars is the lunar calendar on tablet <i>Mamari</i>. The purported readings of some glyphs for the names of the nights, however, did little to iluminate other passages in the corpus.</p>
+<p>The antiquity of the system is another point of contention (Fischer, Guy). Most of the artefacts appear to be recent. Three tablets were carved on European oars, and the only radiocarbon date available for a tablet (Q, Small St. Petersburg) most probably situates it in the 19th century. If, however, RoR can be proven earlier than the European encounter and its function as real writing can be ascertained, this would be a remarkable finding - one of the rare cases of independent invention of writing in the world.</p>
+
+## Approaches to decipherment
+<img src="img/key.png" align="left">
+<p>The earliest attempts at decipherment, still in the 19th century, took advantage of the fact that informants were still alive who had presumably been instructed in RoR - or at least heard the tablets being recited (Routledge). The most famous are Metoro and Ure Vaeiko, who provided readings for entire tablets (Thompson, Jaussen). Metoro's readings provided the basis for Thomas Barthel</p>

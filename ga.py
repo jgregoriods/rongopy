@@ -176,9 +176,9 @@ class GeneticAlgorithm:
 
 
 if __name__ == '__main__':
-    ga = GeneticAlgorithm(pop_size=50, n_parents=20, n_elite=5,
+    ga = GeneticAlgorithm(pop_size=500, n_parents=200, n_elite=50,
                           prob_cross=0.8, prob_mut=0.1)
-    ga.evolve(10)
+    ga.evolve(200)
     print(ga.best_key)
     with open(f'ga{int(time())}.pickle', 'wb') as file:
         pickle.dump(ga, file)
