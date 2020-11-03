@@ -20,7 +20,7 @@ glyphs.sort(key=lambda x: all_glyphs[x], reverse=True)
 glyph_freqs = [all_glyphs[glyph] for glyph in glyphs]
 
 
-if __name__ == '__main__':
+def main():
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 
     ax1.bar(syls, syl_freqs)
@@ -44,3 +44,7 @@ if __name__ == '__main__':
     ax4.set_yticklabels(glyphs[:50]+['999'])
 
     plt.show()
+
+
+if __name__ == '__main__':
+    main()

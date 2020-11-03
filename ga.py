@@ -2,6 +2,7 @@ import keras
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
+import argparse
 
 from time import time
 from math import ceil
@@ -176,9 +177,21 @@ class GeneticAlgorithm:
 
 
 if __name__ == '__main__':
-    ga = GeneticAlgorithm(pop_size=500, n_parents=200, n_elite=50,
-                          prob_cross=0.8, prob_mut=0.1)
-    ga.evolve(200)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--popSize', type=int, default=500)
+    parser.add_argument('-p', '--nParents', type=int, default=200)
+    parser.add_argument('-e', '--nElite', type=int, default=50)
+    parser.add_argument('-c', '--probCross', type=float, default=0.8)
+    parser.add_argument('-m', '--probMut', type=float, default=0.1)
+    parser.add_argument('-g', '--generations', type=int, default=200)
+
+    args = parser.parse_args()
+
+    ga = GeneticAlgorithm(pop_size=args.popSize, n_parents=args.nParents,
+                          n_elite=args.nElite, prob_cross=args.probCross,
+                          prob_mut=args.probMut)
+    ga.evolve(args.generations)
+
     print(ga.best_key)
     with open(f'ga{int(time())}.pickle', 'wb') as file:
         pickle.dump(ga, file)
