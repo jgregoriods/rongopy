@@ -4,6 +4,11 @@
 [2. Approaches to decipherment](#approaches-to-decipherment)
 <br>
 [3. Revising the glyph catalogue](#revising-the-glyph-catalogue)
+<br>
+[4. Basic stats](#basic-stats)
+<br>
+[5. ]
+
 
 ## What is rongorongo?
 <img src="img/key.png" align="left">
@@ -23,11 +28,34 @@
 
 ## Revising the glyph catalogue
 <img src="img/key.png" align="left">
-<p>A sound statistical analysis of RoR depends on the correct transliteration of the texts. Unfortunately, the system devised by Barthel (1958) exaggerates the quantity of glyphs by assigning different numbers to allographs and ligatures. In fact, a quick experiment showed me that, after differentiating the most obvious allographs and separating the most obvious ligatures (e.g. anthropomorphs and ornitomorphs with various hand shapes), we are left with about 50 glyphs accounting 95% of the corpus - a number surprisingly close to the number of Rapanui syllables.</p>
+<p>A sound statistical analysis of RoR depends on the correct transliteration of the texts. Unfortunately, the system devised by Barthel (1958) exaggerates the quantity of glyphs by assigning different numbers to allographs and ligatures. In fact, a quick experiment showed me that, after differentiating the most obvious allographs and separating the most obvious ligatures (e.g. anthropomorphs and ornitomorphs with various hand shapes), we are left with about 50 glyphs accounting for over 90% of the corpus - a number surprisingly close to the number of Rapanui syllables.</p>
 <p>Martha Macri (1996), the Pozdniakovs (<a href="http://pozdniakov.free.fr/publications/2007_Rapanui_Writing_and_the_Rapanui_Language.pdf">2007</a>) and Paul Horley (<a href="https://kahualike.manoa.hawaii.edu/rnj/vol19/iss2/6/">2005</a>) have all attempted to simplify Barthel's catalogue, arriving at pretty similar solutions. Horley offers the most radical restructuring, e.g. considering the anthropomorphic and ornitomorphic glyphs' heads as independent signs. For creating the "simplified" corpus, I mostly adopted the Pozdniakovs' solution, except for the treatment of glyphs like those in the series 420-430, which Pozdniakov (<a href="https://doi.org/10.4000/jso.6371">2011</a>) initially regarded as a ligature of hand glyphs 006 or 010 with anthropomorphic or ornitomorphic glyphs.</p>
 <p>In fact, it is unclear how those glyphs should be treated. In a recent paper, Pozdniakov (<a href="http://pozdniakov.free.fr/publications/2016_Correlation_of_graphical_features.pdf">2016</a>) cast doubt on whether glyphs of the series 220/240/320/340 should be considered as independent glyphs rather than allographs of 200/300, based on the observation that leg shapes are not independent of hand shapes.</p>
-<p>There are many reasons to believe all anthropomorphic glyphs are allographs. For example, the parallel passages XX:XX are striking:</p>
-<p>If anthropomorphic glyphs in standing (200), profile (300) and seating frontal (240)/seating profile (380) position are allographs, should we view ornitomorphic glyphs in the same manner? For example,  should we treat glyphs in the 430 series as "profile" versions of the frontal ornitomorphs (400)? Pozdniakov (<a href="http://pozdniakov.free.fr/publications/2016_Correlation_of_graphical_features.pdf">2016</a>) seems to hint at that possibility for glyphs in the 430 series, even suggesting that Barthel (1958) probably thought so. Here, I have adopted that view, merging all anthropomorphs and most ornitomorphs (except for those in the 660 series) in the "simplified" corpus.</p>
+<p>There are reasons to take that argument one step further and consider all anthropomorphic glyphs as allographs. The parallel passages below are striking:</p>
+<img src="img/parallels.png" width=400>
+<p>Other examples can be found in Aa7:Ra3, Br9:Bv3, Bv3:Ra4, Bv8:Sa5, Bv7 and probably many other places.</p>
+<p>If anthropomorphic glyphs in standing (200/300), seating in profile (280/380) and seating in frontal view (240/340) position are allographs, should we view ornitomorphic glyphs in the same manner? For example,  should we treat glyphs in the 430/630 series as "profile" versions of the frontal ornitomorphs (400/600)? Pozdniakov (<a href="http://pozdniakov.free.fr/publications/2016_Correlation_of_graphical_features.pdf">2016</a>) seems to hint at that possibility for glyphs in the 430 series, even suggesting that Barthel (1958) probably thought so. Here, I have adopted that view, merging all anthropomorphs and most ornitomorphs (except for those in the 660 series) in the "simplified" corpus.</p>
+
+## Basic stats
+
+## Machine learning
+<p>Given a sufficiently long text written in an unknown script, decipherment is achievable - provided the underlying language and type of writing system are known.</p>
+<p>Assuming that RoR is predominantly syllabic, as suggested by the glyph frequencies, one could employ a brute force approach and test different mappings of glyphs to syllables. The problem is one of verifyability - unless an entire text in clear, understandable Rapanui is produced, how to decide between different mappings? Indeed, this seems to be the favourite approach of many pseudo-decipherments, which eventually produce a few meaningful words but have to resort to implausible arguments to interpret longer passages.</p>
+<p>How to decide on the plausibility of a deciphered text? Here, I employ a support vector machine (SVM) classifier and a recurrent neural network (RNN) to predict whether a text is viable Rapanui. I was inspired by Avi Banerjee's treatment of a similar problem - the <a href="https://github.com/CanonManF22/theZodiacKiller">Zodiac killer's cypher</a>.</p>
+<p>Models are trained on a corpus of:</p>
+<ul>
+<li>real Rapanui songs and poetry, assumed to be the genres most likely present in RoR;</li>
+<li>pseudo-Rapanui verses created by randomly concatenating syllables; </li>
+<li>pseudo-Rapanui verses created by encrypting the real verses with a substitution cypher (mapping to different syllables).</li>
+</ul>
+<p>I originally included a fourth category created by shuffling the syllables of real Rapanui verses, but that resulted in poor accuracy when training the models, so I left it out for now.</p>
+<p>Since there is no separation of words in RoR, all the texts were converted into continuous syllables separated by spaces (just to facilitate tokenization). Texts were truncated to a maximum of 50 syllables (longer verses were split). In the case of the LSTM, preprocessing also involved padding to 50 tokens.</p>
+<p>The absence of word separation is a major drawback that prevents, for example, the application of the model designed by Luo et al. (<a href="http://dx.doi.org/10.18653/v1/P19-1303">2019</a>), which depends on matching cognates at the word level.</p>
+
+### LinearSVC and LSTM
+<p>Initially, a Linear Support Vector Classification (SVC) model was trained on the corpus with real Rapanui and the two pseudo datasets using an <i>n</i>-ngram range of 2 to 3 syllables. The classification achieves a validation accuracy above 95%. However, a problem that I found when using LinearSVC with a language like Rapanui (which has a very limited phonological inventory) is that it is very prone to misclassifying random concatenations of syllables that eventually contain Rapanui words, but which don't make sense as a sentence. Increasing the <i>n</i>-gram range did not solve this issue.</p>
+<p>Because the order in which words occur is also important in deciding whether a sentence is valid Rapanui (beyond the mere frequency of <i>n</i>-grams), a potential solution is to train a Long Short-Term Memory (LSTM) network. The network has an embedding layer of size 32, a bidirectional LSTM layer of size 64, a dropout of 20% and a dense output layer of size 3 (real Rapanui and the two pseudo-corpora) with softmax activation. Other architectures are possible, but out of the ones I tried, this yielded the highest validation accuracy (70-80%).</p>
+<p>I used sklearn for implementing the LinearSVC and tensorflow for the LSTM.</p>
 
 ## References
 <p>Barthel, Thomas. 1958. <i>Grundlagen zur Entzifferung der Osterinselschrift.</i> Hamburg: Cram, de Gruyter & Co.</p>
@@ -46,6 +74,9 @@
 <p>Horley, Paul. 2011. <a href="https://doi.org/10.4000/jso.6314">Lunar calendar in rongorongo texts and rock art of Easter Island.</a> <i>Journal de la Société des Océanistes</i> 132: 17-38.</p>
 <p>Jaussen, Florentine. 1893. <i>L'île de Pâques: Historique, Écriture et Répertoire des signes des tablettes ou bois d'hibiscus intelligents</i>. Paris: Ernest Leraux.</p>
 <p>Langdon, Robert, and Steven Roger Fischer. 1996. <a href="http://www.jstor.org/stable/20706648">Easter Island's 'Deed of Cession' of 1770 and the origin of its rongorongo script.</a> <i>The Journal of the Polynesian Society</i> 105 (1): 109-124.</p>
+
+<p>Luo, Jiaming; Cao, Yuan; Barzilay, Regina. 2019. <a href="http://dx.doi.org/10.18653/v1/P19-1303">Neural Decipherment via Minimum-Cost Flow: from Ugaritic to Linear B.</a> <i>Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics</i>, pp. 3146–3155. Florence, Italy.</p>
+
 <p>Macri, Martha. 1996. Rongorongo of Easter Island In Peter T. Daniels and William Bright (eds), <i>The World’s writing systems.</i> Oxford, Oxford University Press, pp. 183-188.</p>
 <p>Métraux, Alfred. 1940. <i>Ethnology of Easter Island</i>. Honolulu: Bishop Museum.</p>
 <p>Orliac, Catherine. 2005. <a href="https://doi.org/10.1002/j.1834-4453.2005.tb00597.x">The Rongorongo tablets from Easter Island: botanical identification and 14C dating.</a> <i>Archaeology in Oceania</i> 40: 115-119.</p>
