@@ -110,7 +110,7 @@ class GeneticAlgorithm:
         self.avg_scores = [np.mean([genome.score for genome in self.genomes])]
         self.best_key = {}
 
-    def orx(self, parent1, parent2):
+    def ox1(self, parent1, parent2):
         i = randint(0, len(parent1) - 1)
         j = randint(i + 1, len(parent1))
         segment = parent1[i:j]

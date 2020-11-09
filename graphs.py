@@ -21,24 +21,30 @@ glyph_freqs = [all_glyphs[glyph] for glyph in glyphs]
 
 
 def main():
+    plt.rc('xtick', labelsize=5)
+    plt.rc('ytick', labelsize=5)
+
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+    fig.tight_layout()
 
     ax1.bar(syls, syl_freqs)
+    ax1.set_xticklabels(syls, rotation='vertical')
 
     ax2.imshow(syl_matrix)
 
     ax2.set_xticks(list(range(len(syllables))))
-    ax2.set_xticklabels(syllables)
+    ax2.set_xticklabels(syllables, rotation='vertical')
 
     ax2.set_yticks(list(range(len(syllables))))
     ax2.set_yticklabels(syllables)
 
     ax3.bar(glyphs[:50], glyph_freqs[:50])
+    ax3.set_xticklabels(glyphs[:50], rotation='vertical')
 
     ax4.imshow(bigram_matrix)
 
     ax4.set_xticks(list(range(51)))
-    ax4.set_xticklabels(glyphs[:50]+['999'])
+    ax4.set_xticklabels(glyphs[:50]+['999'], rotation='vertical')
 
     ax4.set_yticks(list(range(51)))
     ax4.set_yticklabels(glyphs[:50]+['999'])

@@ -7,7 +7,7 @@
 <br>
 [4. Basic stats](#basic-stats)
 <br>
-[5. ]
+[5. Solving the problem with machine learning](#solving-the-problem-with-machine-learning)
 
 
 ## What is rongorongo?
@@ -37,8 +37,9 @@
 <p>If anthropomorphic glyphs in standing (200/300), seating in profile (280/380) and seating in frontal view (240/340) position are allographs, should we view ornitomorphic glyphs in the same manner? For example,  should we treat glyphs in the 430/630 series as "profile" versions of the frontal ornitomorphs (400/600)? Pozdniakov (<a href="http://pozdniakov.free.fr/publications/2016_Correlation_of_graphical_features.pdf">2016</a>) seems to hint at that possibility for glyphs in the 430 series, even suggesting that Barthel (1958) probably thought so. Here, I have adopted that view, merging all anthropomorphs and most ornitomorphs (except for those in the 660 series) in the "simplified" corpus.</p>
 
 ## Basic stats
+<img src="img/graphs.png" width=750>
 
-## Machine learning
+## Solving the problem with machine learning
 <p>Given a sufficiently long text written in an unknown script, decipherment is achievable - provided the underlying language and type of writing system are known.</p>
 <p>Assuming that RoR is predominantly syllabic, as suggested by the glyph frequencies, one could employ a brute force approach and test different mappings of glyphs to syllables. The problem is one of verifyability - unless an entire text in clear, understandable Rapanui is produced, how to decide between different mappings? Indeed, this seems to be the favourite approach of many pseudo-decipherments, which eventually produce a few meaningful words but have to resort to implausible arguments to interpret longer passages.</p>
 <p>How to decide on the plausibility of a deciphered text? Here, I employ a support vector machine (SVM) classifier and a recurrent neural network (RNN) to predict whether a text is viable Rapanui. I was inspired by Avi Banerjee's treatment of a similar problem - the <a href="https://github.com/CanonManF22/theZodiacKiller">Zodiac killer's cypher</a>.</p>
@@ -48,14 +49,18 @@
 <li>pseudo-Rapanui verses created by randomly concatenating syllables; </li>
 <li>pseudo-Rapanui verses created by encrypting the real verses with a substitution cypher (mapping to different syllables).</li>
 </ul>
-<p>I originally included a fourth category created by shuffling the syllables of real Rapanui verses, but that resulted in poor accuracy when training the models, so I left it out for now.</p>
+<p>I originally included a fourth category created by shuffling the syllables of real Rapanui verses, but that somehow resulted in models that were difficult to train, so I left it out for now.</p>
 <p>Since there is no separation of words in RoR, all the texts were converted into continuous syllables separated by spaces (just to facilitate tokenization). Texts were truncated to a maximum of 50 syllables (longer verses were split). In the case of the LSTM, preprocessing also involved padding to 50 tokens.</p>
 <p>The absence of word separation is a major drawback that prevents, for example, the application of the model designed by Luo et al. (<a href="http://dx.doi.org/10.18653/v1/P19-1303">2019</a>), which depends on matching cognates at the word level.</p>
 
 ### LinearSVC and LSTM
 <p>Initially, a Linear Support Vector Classification (SVC) model was trained on the corpus with real Rapanui and the two pseudo datasets using an <i>n</i>-ngram range of 2 to 3 syllables. The classification achieves a validation accuracy above 95%. However, a problem that I found when using LinearSVC with a language like Rapanui (which has a very limited phonological inventory) is that it is very prone to misclassifying random concatenations of syllables that eventually contain Rapanui words, but which don't make sense as a sentence. Increasing the <i>n</i>-gram range did not solve this issue.</p>
-<p>Because the order in which words occur is also important in deciding whether a sentence is valid Rapanui (beyond the mere frequency of <i>n</i>-grams), a potential solution is to train a Long Short-Term Memory (LSTM) network. The network has an embedding layer of size 32, a bidirectional LSTM layer of size 64, a dropout of 20% and a dense output layer of size 3 (real Rapanui and the two pseudo-corpora) with softmax activation. Other architectures are possible, but out of the ones I tried, this yielded the highest validation accuracy (70-80%).</p>
-<p>I used sklearn for implementing the LinearSVC and tensorflow for the LSTM.</p>
+<p>Because the order in which words occur is crucial for deciding whether a sentence is valid Rapanui (beyond the mere frequency of <i>n</i>-grams), a potential solution is to train a Long Short-Term Memory (LSTM) network. The network has an embedding layer of size 32, a bidirectional LSTM layer of size 64, a dropout of 20% and a dense output layer of size 3 (real Rapanui and the two pseudo-corpora) with softmax activation. Other architectures are possible, but out of the ones I tried, this yielded the highest validation accuracy (70-80%).</p>
+<p>I used sklearn for the LinearSVC and tensorflow for the LSTM. Models can be loaded from the <code>models</code> folder.</p>
+
+### Genetic algorithm
+<p>Every genome in the population is a sequence of syllables to be matched with the top 50 most frequent glyphs (ordered). I tested two methods: (1) initializing every genome to a different, random sequence, and (2) initializing every genome with the same sequence - ordered by the actual Rapanui syllable frequencies.</p>
+<p>Because order is meaningful, I experimented with two different crossover methods - ordered crossover (OX1) and edge recombination crossover (ERX). Mutation involves swapping two random syllables. Originally, when initializing genomes based on the Rapanui syllable frequencies, I thought it was a good idea to only swap the syllables in immediate vicinity - but since OX1 and ERX were doing pretty much the same, I reserved mutations for more drastic changes.</p>
 
 ## References
 <p>Barthel, Thomas. 1958. <i>Grundlagen zur Entzifferung der Osterinselschrift.</i> Hamburg: Cram, de Gruyter & Co.</p>
