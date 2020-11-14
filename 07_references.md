@@ -1,4 +1,4 @@
-## References
+# References
 <p>Barthel, Thomas. 1958. <i>Grundlagen zur Entzifferung der Osterinselschrift.</i> Hamburg: Cram, de Gruyter & Co.</p>
 <p>Butinov, Nikolai A. and Yuri Knorozov. 1957. Preliminary Report on the Study of the Written Language of Easter Island. <i>Journal of the Polynesian Society</i> 66 (1): 5–17.</p>
 <p>Davletshin, Albert. 2012a. <a href="https://doi.org/10.4000/jso.6658">Name in the Kohau Rongorongo script (Easter Island).</a> <i>Journal de la Société des Océanistes</i> 134: 95-110.</p>
