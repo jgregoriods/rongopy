@@ -1,6 +1,7 @@
 # Data
 <p>The following artefacts were retained for the analysis: A, B, C, D, E, G, N, P, R and S. G was selected as inclusive of the text in K, and P was selected as representative of H-P-Q. The Santiago Staff (I) reflects a very particular genre and structure (also present in parts of G-K), and was left out of the analysis for now.</p>
 <p>The corpus is provided as a dictionary with artefacts' names (letters) as keys. Values are themselves dictionaries with each line as key and a string of glyphs separated by a dash as value:</p>
+
 ```python
 from tablets import tablets, tablets_clean, tablets_simple
 
