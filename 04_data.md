@@ -8,7 +8,7 @@
 '595-1-50.394s-4-2-595.1-50-301s-4-2-40-211-91-200-595.2-394-4t-2-595.2-50-394-4t-2-595.2-50-301s.4-2-211s:42-91-595s-600-50-381-4-2-306-325-430-53-430-17-430-4-2-208-200-2-22-305.74f-95-1-?-69*'
 ```
 
-<p>In addition to Barthel's transliteration <i>ipsis litteris</i>, two other versions are provided. Glyphs in <code>tablets_clean</code> are stripped of the letters that identify variants, padded to three digits and reordered in cases of bottom-up ligatures. <code>tablets_simple</code> contain a more radical restructuring based on proposals such as those of Pozdniakov and Pozdniakov (<a href="http://pozdniakov.free.fr/publications/2007_Rapanui_Writing_and_the_Rapanui_Language.pdf">2007</a>) and Horley (<a href="https://kahualike.manoa.hawaii.edu/rnj/vol19/iss2/6/">2005</a>) (see <a href="./03_catalogue.md">Revising the Glyph Catalogue</a>):</p>
+<p>In addition to Barthel's transliteration <i>ipsis litteris</i>, two other versions are provided. Glyphs in <code>tablets_clean</code> are stripped of the letters that identify variants, padded to three digits and reordered in cases of bottom-up ligatures. <code>tablets_simple</code> contain a more radical restructuring based on proposals such as those of Pozdniakov and Pozdniakov (<a href="http://pozdniakov.free.fr/publications/2007_Rapanui_Writing_and_the_Rapanui_Language.pdf">2007</a>) and Horley (<a href="https://kahualike.manoa.hawaii.edu/rnj/vol19/iss2/6/">2005</a>) (see <a href="./03_catalogue.html">Revising the Glyph Catalogue</a>):</p>
 
 ```python
 >>> tablets_clean['B']['Br1']
