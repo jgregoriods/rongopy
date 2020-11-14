@@ -7,7 +7,7 @@
 <br>
 [4. Basic stats](#basic-stats)
 <br>
-[5. Solving the problem with machine learning](#solving-the-problem-with-machine-learning)
+[5. A machine learning approach](#a-machine-learning-approach)
 <br>
 [6. Results](#results)
 
@@ -38,10 +38,18 @@
 <p>Other examples can be found in Aa7:Ra3, Br9:Bv3, Bv3:Ra4, Bv8:Sa5, Bv7 and probably many other places.</p>
 <p>If anthropomorphic glyphs in standing (200/300), seating in profile (280/380) and seating in frontal view (240/340) position are allographs, should we view ornitomorphic glyphs in the same manner? For example,  should we treat glyphs in the 430/630 series as "profile" versions of the frontal ornitomorphs (400/600)? Pozdniakov (<a href="http://pozdniakov.free.fr/publications/2016_Correlation_of_graphical_features.pdf">2016</a>) seems to hint at that possibility for glyphs in the 430 series, even suggesting that Barthel (1958) probably thought so. Here, I have adopted that view, merging all anthropomorphs and most ornitomorphs (except for those in the 660 series) in the "simplified" corpus.</p>
 
+## Data
+<p>The following artefacts were retained for the analysis: A, B, C, D, E, G, N, P, R and S. G was selected as inclusive of the text in K, and P was selected as representative of H-P-Q. The Santiago Staff (I) reflects a very particular genre and structure (also present in parts of G-K), and was left out of the analysis for now.</p>
+<p>The corpus is provided as a dictionary with artefacts' names (letters) as keys. Values are themselves dictionaries with each line as key and a string of glyphs separated by a dash as value:</p>
+<pre><code>from tablets import tablets, tablets_clean, tablets_simple
+
+tablets['B']['Br1']
+'595-1-50.394s-4-2-595.1-50-301s-4-2-40-211-91-200-595.2-394-4t-2-595.2-50-394-4t-2-595.2-50-301s.4-2-211s:42-91-595s-600-50-381-4-2-306-325-430-53-430-17-430-4-2-208-200-2-22-305.74f-95-1-?-69*'</pre></code>
+
 ## Basic stats
 <img src="img/graphs.png" width=750>
 
-## Solving the problem with machine learning
+## A machine learning approach
 <p>Given a sufficiently long text written in an unknown script, decipherment is achievable - provided the underlying language and type of writing system are known.</p>
 <p>Assuming that RoR is predominantly syllabic, as suggested by the glyph frequencies, one could employ a brute force approach and test different mappings of glyphs to syllables. The problem is one of verifyability - unless an entire text in clear, understandable Rapanui is produced, how to decide between different mappings? Indeed, this seems to be the favourite approach of many pseudo-decipherments, which eventually produce a few meaningful words but have to resort to implausible arguments to interpret longer passages.</p>
 <p>How to decide on the plausibility of a deciphered text? Here, I employ a support vector machine (SVM) classifier and a recurrent neural network (RNN) to predict whether a text is viable Rapanui. I was inspired by Avi Banerjee's treatment of a similar problem - the <a href="https://github.com/CanonManF22/theZodiacKiller">Zodiac killer's cypher</a>.</p>
@@ -68,8 +76,10 @@
 <img src="img/gas.png">
 
 ## Results
-<p>I was astonished to find that, even when all genomes are randomly initialized, the final keys of the best-performing models are similar. The following values are consistently selected by the top 10 best-performing models of each run:</p>
-<img src="img/glyphs.png" width=350>
+<p>I was astonished to find that, even when all genomes are randomly initialized, the final keys of the best-performing models are similar. The following values are consistently selected by the top 10 best-performing (and non-identical) genomes of each run (among a total of 4 runs using a combination of genomes initialized by frequency vs. randomly and crossovers by ERX vs. OX1):</p>
+<img src="img/glyphs.png" width=300>
+<p>Interestingly, some of those values have been proposed before. For example, readings of 200 as <i>te</i> and 002 as <i>a</i> have been suggested by Horley (<a href="https://kahualike.manoa.hawaii.edu/rnj/vol19/iss2/6/">2005</a>) - although he saw the latter glyph as an allograph for the former's head (forming a frequent ligature that could be read as <i>tea</i>). The reading of 400 as <i>ta</i>, perhaps from the first syllable of <i>tavake</i> (sea bird), was proposed long ago by Guy (<a href="https://doi.org/10.3406/jso.1990.2882">1990</a>) based on the supposed spelling of one of the nights' names in the Mamari calendar.</p>
+
 
 ## References
 <p>Barthel, Thomas. 1958. <i>Grundlagen zur Entzifferung der Osterinselschrift.</i> Hamburg: Cram, de Gruyter & Co.</p>
@@ -88,9 +98,7 @@
 <p>Horley, Paul. 2011. <a href="https://doi.org/10.4000/jso.6314">Lunar calendar in rongorongo texts and rock art of Easter Island.</a> <i>Journal de la Société des Océanistes</i> 132: 17-38.</p>
 <p>Jaussen, Florentine. 1893. <i>L'île de Pâques: Historique, Écriture et Répertoire des signes des tablettes ou bois d'hibiscus intelligents</i>. Paris: Ernest Leraux.</p>
 <p>Langdon, Robert, and Steven Roger Fischer. 1996. <a href="http://www.jstor.org/stable/20706648">Easter Island's 'Deed of Cession' of 1770 and the origin of its rongorongo script.</a> <i>The Journal of the Polynesian Society</i> 105 (1): 109-124.</p>
-
 <p>Luo, Jiaming; Cao, Yuan; Barzilay, Regina. 2019. <a href="http://dx.doi.org/10.18653/v1/P19-1303">Neural Decipherment via Minimum-Cost Flow: from Ugaritic to Linear B.</a> <i>Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics</i>, pp. 3146–3155. Florence, Italy.</p>
-
 <p>Macri, Martha. 1996. Rongorongo of Easter Island In Peter T. Daniels and William Bright (eds), <i>The World’s writing systems.</i> Oxford, Oxford University Press, pp. 183-188.</p>
 <p>Métraux, Alfred. 1940. <i>Ethnology of Easter Island</i>. Honolulu: Bishop Museum.</p>
 <p>Orliac, Catherine. 2005. <a href="https://doi.org/10.1002/j.1834-4453.2005.tb00597.x">The Rongorongo tablets from Easter Island: botanical identification and 14C dating.</a> <i>Archaeology in Oceania</i> 40: 115-119.</p>
