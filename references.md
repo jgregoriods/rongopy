@@ -1,0 +1,27 @@
+## References
+<p>Barthel, Thomas. 1958. <i>Grundlagen zur Entzifferung der Osterinselschrift.</i> Hamburg: Cram, de Gruyter & Co.</p>
+<p>Butinov, Nikolai A. and Yuri Knorozov. 1957. Preliminary Report on the Study of the Written Language of Easter Island. <i>Journal of the Polynesian Society</i> 66 (1): 5–17.</p>
+<p>Davletshin, Albert. 2012a. <a href="https://doi.org/10.4000/jso.6658">Name in the Kohau Rongorongo script (Easter Island).</a> <i>Journal de la Société des Océanistes</i> 134: 95-110.</p>
+<p>Davletshin, Albert. 2012b. <a href="https://doi.org/10.15286/jps.121.3.243-274">Numerals and Phonetic Complements in the Kohau Rongorongo Script of Easter Island.</a> <i>Journal of The Polynesian Society</i> 121: 243-274.</p>
+<p>Fischer, Steven R. 1995a. <a href="https://www.jstor.org/stable/20706625">Preliminary evidence for cosmogonic texts in Rapanui's Rongorongo inscriptions.</a> <i>The Journal of the Polynesian Society</i> 104 (3): 303–321.</p>
+<p>Fischer, Steven R. 1995b. <a href="https://kahualike.manoa.hawaii.edu/rnj/vol9/iss4/1/">Further Evidence for Cosmogonic Texts in the Rongorongo Inscriptions of Easter Island.</a> <i>Rapa Nui Journal</i> 9 (4): 1.</p>
+<p>Guy Jacques B. M. 1990. <a href="https://doi.org/10.3406/jso.1990.2882">The lunar calendar of Tablet Mamari.</a> <i>Journal de la Société des océanistes</i> 91: 135-149.</p>
+<p>Guy, Jacques B. M. 1998. <a href="https://doi.org/10.3406/jso.1998.2041">Un prétendu déchiffrement des tablettes de l'île de Pâques.</a> <i>Journal de la Société des Océanistes</i> 106: 57-63.</p>
+<p>Guy, Jacques B. M. 2006. <a href="https://kahualike.manoa.hawaii.edu/rnj/vol20/iss1/9/">General Properties of the Rongorongo Writing.</a> <i>Rapa Nui Journal</i> 20 (1).</p>
+<p>Harris, Martyn and Tomi S. Melka. 2011a. <a href="https://doi.org/10.1080/09296174.2011.556003">The Rongorongo Script: On a Listed Sequence in the Recto of Tablet “Mamari”.</a> <i>Journal of Quantitative Linguistics</i> 18(2): 122-173.</p>
+<p>Harris, Martyn and Tomi S. Melka. 2011b. <a href="https://doi.org/10.1080/09296174.2011.581850">The Rongorongo Script: On a Listed Sequence in the Recto of Tablet “Mamari”. Part II.</a> <i>Journal of Quantitative Linguistics</i> 18(3): 234-273.</p>
+<p>Horley, Paul. 2005. <a href="https://kahualike.manoa.hawaii.edu/rnj/vol19/iss2/6/">Allographic Variations and Statistical Analysis of the Rongorongo Script.</a> Rapa Nui Journal 19 (2).</p>
+<p>Horley, Paul. 2007. <a href="https://kahualike.manoa.hawaii.edu/rnj/vol21/iss1/7/">Structural Analysis of Rongorongo Inscriptions.</a> Rapa Nui Journal 21 (1).</p>
+<p>Horley, Paul. 2011. <a href="https://doi.org/10.4000/jso.6314">Lunar calendar in rongorongo texts and rock art of Easter Island.</a> <i>Journal de la Société des Océanistes</i> 132: 17-38.</p>
+<p>Jaussen, Florentine. 1893. <i>L'île de Pâques: Historique, Écriture et Répertoire des signes des tablettes ou bois d'hibiscus intelligents</i>. Paris: Ernest Leraux.</p>
+<p>Langdon, Robert, and Steven Roger Fischer. 1996. <a href="http://www.jstor.org/stable/20706648">Easter Island's 'Deed of Cession' of 1770 and the origin of its rongorongo script.</a> <i>The Journal of the Polynesian Society</i> 105 (1): 109-124.</p>
+<p>Luo, Jiaming; Cao, Yuan; Barzilay, Regina. 2019. <a href="http://dx.doi.org/10.18653/v1/P19-1303">Neural Decipherment via Minimum-Cost Flow: from Ugaritic to Linear B.</a> <i>Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics</i>, pp. 3146–3155. Florence, Italy.</p>
+<p>Macri, Martha. 1996. Rongorongo of Easter Island In Peter T. Daniels and William Bright (eds), <i>The World’s writing systems.</i> Oxford, Oxford University Press, pp. 183-188.</p>
+<p>Métraux, Alfred. 1940. <i>Ethnology of Easter Island</i>. Honolulu: Bishop Museum.</p>
+<p>Orliac, Catherine. 2005. <a href="https://doi.org/10.1002/j.1834-4453.2005.tb00597.x">The Rongorongo tablets from Easter Island: botanical identification and 14C dating.</a> <i>Archaeology in Oceania</i> 40: 115-119.</p>
+<p>Pozdniakov, Konstantin. 1996. <a href="https://doi.org/10.3406/jso.1996.1995">Les bases du déchiffrement de l'écriture de l'île de Pâques.</a> <i>Journal de la Société des océanistes</i> 103: 289-303.</p>
+<p>Pozdniakov, Konstantin; Igor Pozdniakov. 2007. <a href="http://pozdniakov.free.fr/publications/2007_Rapanui_Writing_and_the_Rapanui_Language.pdf">Rapanui Writing and the Rapanui Language: Preliminary Results of a Statistical Analysis.</a> <i>Forum for Anthropology and Culture</i> 3: 3–36.</p>
+<p>Pozdniakov, Konstantin. 2011. <a href="https://doi.org/10.4000/jso.6371">Tablet Keiti and calendar-like structures in Rapanui script.</a> <i>Journal de la Société des Océanistes</i> 132: 39-74.</p>
+<p>Routledge, Katherine. 1919. <i>The Mystery of Easter Island: The story of an expedition</i>. London: Hazell, Watson and Viney.</p>
+<p>Schoch, R. and Melka, T. 2019. <a href="https://www.sav.sk/index.php?lang=sk&doc=journal-list&part=article_response_page&journal_article_no=17609">The raŋitoki (rangitoki) bark-cloth piece: a newly recognized rongorongo fragment from Easter Island.</a> <i>Asian and African Studies</i> 28 (2): 113-148.</p>
+<p>Thomson, William J. 1889. <i>Te Pito Te Henua, or Easter Island.</i> Report of the United States National Museum for the year ending June 30, 1889.
