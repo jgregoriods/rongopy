@@ -176,7 +176,7 @@ class GeneticAlgorithm:
         plt.show()
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--popSize', type=int, default=500)
     parser.add_argument('-p', '--nParents', type=int, default=200)
@@ -195,3 +195,7 @@ if __name__ == '__main__':
     print(ga.best_key)
     with open(f'ga{int(time())}.pickle', 'wb') as file:
         pickle.dump(ga, file)
+
+
+if __name__ == '__main__':
+    main()
