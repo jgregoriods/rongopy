@@ -10,10 +10,6 @@ from keras.models import Sequential
 from keras.layers import Embedding, LSTM, Dense
 
 
-with open('./tablets/tablets_clean.json') as file:
-    tablets = json.load(file)
-
-
 class TabletModel:
     def __init__(self):
         self.tokenizer = Tokenizer()
@@ -28,7 +24,6 @@ class TabletModel:
         with open(filepath) as file:
             self.raw_data = json.load(file)
 
-    def preprocess_data(self):
         data = []
         for tablet in self.raw_data:
             for line in self.raw_data[tablet]:
@@ -70,3 +65,11 @@ class TabletModel:
         self.history = self.model.fit(X, y, validation_split=validation_split, epochs=epochs, verbose=2)
         plt.plot(self.history.history['val_accuracy'])
         plt.show()
+
+
+if __name__ == '__main__':
+    tm = TabletModel()
+    tm.load_data('./tablets/tablets_clean.json')
+    X, y = tm.make_training_data()
+    tm.build(32, 128)
+    tm.train(X, y, 0.33, 100)
