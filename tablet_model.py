@@ -2,12 +2,12 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-from keras.utils import to_categorical
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.utils import to_categorical
 
-from keras.models import Sequential
-from keras.layers import Embedding, LSTM, Dense
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, LSTM, Dense
 
 
 class TabletModel:
@@ -71,5 +71,5 @@ if __name__ == '__main__':
     tm = TabletModel()
     tm.load_data('./tablets/tablets_clean.json')
     X, y = tm.make_training_data()
-    tm.build(32, 128)
-    tm.train(X, y, 0.33, 100)
+    tm.build(64, 256)
+    tm.train(X, y, 0.25, 100)
