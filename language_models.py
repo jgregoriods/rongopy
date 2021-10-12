@@ -49,6 +49,32 @@ def preprocess(line):
     return line_padded
 
 
+class LanguageModelSVC:
+    def __init__(self, labelled_texts):
+        self.classifier = CalibratedClassifierCV(LinearSVC())
+        self.texts = labelled_texts['text']
+        self.labels = labelled_texts['label']
+        self.vectorizer = TfidfVectorizer(ngram_range=(2, 6))
+
+    def make_training_data(self, test_split):
+        self.vectorizer.fit(self.texts)
+        ngrams = self.vectorizer.transform(self.texts)
+
+        train_size = int(len(texts) * test_split)
+        X_train = ngrams[:train_size]
+        X_test = ngrams[train_size:]
+
+        y_train = self.labels[:train_size]
+        y_test = self.labels[train_size:]
+
+        return X_train, y_train, X_test, y_test
+
+    def train(self, X_train, y_train, X_test=None, y_test=None):
+        self.classifier.fit(X_train, y_train)
+        if X_test is not None and y_test is not None:
+            print('LinearSVC score:', self.classifier.score(X_test, y_test))
+
+
 if __name__ == '__main__':
     # SVC model
     linear_svc = LinearSVC()
