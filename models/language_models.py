@@ -1,5 +1,8 @@
+import numpy as np
+import pandas as pd
 import tensorflow as tf
 import pickle
+import matplotlib.pyplot as plt
 
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
@@ -11,42 +14,89 @@ from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from prepare_texts import real, texts, labels, MAX_LEN
+
+from sklearn.utils import shuffle
+
+from config import SYLLABLES, MIN_VERSE_LEN, MAX_VERSE_LEN
 
 
-NUM_SYLS = 50  # total number of syllables in the language
-TRAIN_SIZE = int(len(texts) * 0.9)
+class CorpusLabeller:
+    def __init__(self, corpus):
+        self.corpus = corpus
+        self.crypto_corpus = self.encrypt_corpus()
+        self.shuffled_corpus = self.shuffle_corpus()
+        self.random_corpus = self.randomize_corpus()
+        self.labelled_texts = self.label_texts()
 
-X_train = texts[:TRAIN_SIZE]
-y_train = labels[:TRAIN_SIZE]
+    def encrypt_line(self, line):
+        random_key = {}
+        syls_cp = SYLLABLES.copy()
+        np.random.shuffle(syls_cp)
+        for i in range(len(SYLLABLES)):
+            random_key[SYLLABLES[i]] = syls_cp[i]
+        crypto_line = []
+        for i in range(0, len(line), 2):
+            crypto_line.append(random_key[line[i:i+2]])
+        return ''.join(crypto_line)
 
-X_test = texts[TRAIN_SIZE:]
-y_test = labels[TRAIN_SIZE:]
+    def shuffle_line(self, line):
+        shuffled_line = []
+        for i in range(0, len(line), 2):
+            shuffled_line.append(line[i:i+2])
+        np.random.shuffle(shuffled_line)
+        return ''.join(shuffled_line)
 
-vectorizer = TfidfVectorizer(ngram_range=(2, 3))
-vectorizer.fit(texts)
+    def randomize_line(self, line):
+        random_line = []
+        for i in range(0, len(line), 2):
+            random_line.append(np.random.choice(SYLLABLES))
+        return ''.join(random_line)
 
-ngrams = vectorizer.transform(texts)
-ngrams_train = ngrams[:TRAIN_SIZE]
-ngrams_test = ngrams[TRAIN_SIZE:]
+    def encrypt_corpus(self):
+        crypto_corpus = []
+        for verse in self.corpus:
+            crypto_corpus.append(self.encrypt_line(verse))
+        return crypto_corpus
 
-tokenizer = Tokenizer(num_words=NUM_SYLS, oov_token='<OOV>')
-tokenizer.fit_on_texts(real['text'])
+    def randomize_corpus(self):
+        random_corpus = []
+        for verse in self.corpus:
+            random_corpus.append(self.randomize_line(verse))
+        return random_corpus
 
-X_train_seqs = tokenizer.texts_to_sequences(X_train)
-X_test_seqs = tokenizer.texts_to_sequences(X_test)
+    def shuffle_corpus(self):
+        shuffled_corpus = []
+        for verse in self.corpus:
+            shuffled_corpus.append(self.shuffle_line(verse))
+        return shuffled_corpus
 
-X_train_padded = pad_sequences(X_train_seqs, maxlen=MAX_LEN,
-                               padding='post', truncating='post')
-X_test_padded = pad_sequences(X_test_seqs, maxlen=MAX_LEN,
-                              padding='post', truncating='post')
+    def truncate(self, text):
+        separated = []
+        for verse in text:
+            line = []
+            for i in range(0, len(verse), 2):
+                line.append(verse[i:i+2])
+                if len(line) >= MAX_VERSE_LEN:
+                    separated.append([' '.join(line)])
+                    line = []
+            if len(line) >= MIN_VERSE_LEN:
+                separated.append([' '.join(line)])
+        return separated
 
+    def label_texts(self):
+        real_corpus = self.truncate(self.corpus)
+        real_corpus_df = pd.DataFrame(real_corpus, columns=['text'])
+        real_corpus_df['label'] = 0
 
-def preprocess(line):
-    line_seqs = tokenizer.texts_to_sequences(line)
-    line_padded = pad_sequences(line_seqs, maxlen=MAX_LEN,
-                                padding='post', truncating='post')
-    return line_padded
+        pseudo_corpus = self.truncate(self.crypto_corpus)
+        pseudo_corpus_df = pd.DataFrame(pseudo_corpus, columns=['text'])
+        pseudo_corpus_df['label'] = 1
+
+        all_texts = pd.concat([real_corpus_df, pseudo_corpus_df], ignore_index=True)
+        all_texts = shuffle(all_texts)
+        all_texts.reset_index(inplace=True)
+
+        return all_texts
 
 
 class LanguageModelSVC:
@@ -60,7 +110,7 @@ class LanguageModelSVC:
         self.vectorizer.fit(self.texts)
         ngrams = self.vectorizer.transform(self.texts)
 
-        train_size = int(len(texts) * test_split)
+        train_size = int(len(self.texts) * (1 - test_split))
         X_train = ngrams[:train_size]
         X_test = ngrams[train_size:]
 
@@ -79,29 +129,46 @@ class LanguageModelSVC:
         return probs
 
 
-if __name__ == '__main__':
-    # SVC model
-    linear_svc = LinearSVC()
-    clf = CalibratedClassifierCV(linear_svc)
-    clf.fit(ngrams_train, y_train)
+class LanguageModelLSTM:
+    def __init__(self, labelled_texts):
+        self.tokenizer = Tokenizer()
+        self.texts = labelled_texts['text']
+        self.labels = labelled_texts['label']
+        self.vocab_size = 0
+        self.model = None
 
-    print('LinearSVC score:', clf.score(ngrams_test, y_test))
+    def make_training_data(self, test_split):
+        train_size = int(len(self.texts) * (1 - test_split))
 
-    pickle.dump(clf, open('svc_model', 'wb'))
+        X_train_raw = self.texts[:train_size]
+        X_test_raw = self.texts[train_size:]
 
-    # LSTM model
-    lstm_model = Sequential([
-        Embedding(NUM_SYLS, 32),
-        Bidirectional(LSTM(64)),
-        Dropout(0.2),
-        Dense(3, activation='softmax')
-    ])
+        y_train = self.labels[:train_size]
+        y_test = self.labels[train_size:]
 
-    lstm_model.compile(loss='sparse_categorical_crossentropy',
-                       optimizer='adam',
-                       metrics=['accuracy'])
+        self.tokenizer.fit_on_texts(self.texts)
+        self.vocab_size = len(self.tokenizer.word_index) + 1
+        X_train = self.tokenizer.texts_to_sequences(X_train_raw)
+        X_test = self.tokenizer.texts_to_sequences(X_test_raw)
 
-    lstm_model.fit(X_train_padded, y_train, epochs=30,
-                   validation_data=(X_test_padded, y_test))
+        X_train_padded = pad_sequences(X_train, maxlen=MAX_VERSE_LEN,
+                                       padding='post', truncating='post')
+        X_test_padded = pad_sequences(X_test, maxlen=MAX_VERSE_LEN,
+                                      padding='post', truncating='post')
 
-    lstm_model.save('lstm_model')
+        return X_train_padded, y_train, X_test_padded, y_test
+
+    def build(self, embedding_size, lstm_size, dropout):
+        self.model = Sequential([
+            Embedding(self.vocab_size, embedding_size),
+            Bidirectional(LSTM(lstm_size)),
+            Dropout(dropout),
+            Dense(2, activation='softmax')
+        ])
+
+        self.model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    def train(self, X, y, validation_split, epochs):
+        self.history = self.model.fit(X, y, validation_split=validation_split, epochs=epochs, verbose=1)
+        plt.plot(self.history.history['val_accuracy'])
+        plt.show()
