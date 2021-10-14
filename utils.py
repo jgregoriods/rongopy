@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from sklearn.utils import shuffle
+
 from config import SYLLABLES, MIN_VERSE_LEN, MAX_VERSE_LEN
 
 
@@ -39,7 +41,7 @@ class CorpusLabeller:
     def encrypt_corpus(self):
         crypto_corpus = []
         for verse in self.corpus:
-            crypto_corpus.append(self.make_crypto_line(verse))
+            crypto_corpus.append(self.encrypt_line(verse))
         return crypto_corpus
 
     def randomize_corpus(self):
@@ -68,4 +70,16 @@ class CorpusLabeller:
         return separated
 
     def label_texts(self):
-        pass
+        real_corpus = self.truncate(self.corpus)
+        real_corpus_df = pd.DataFrame(real_corpus, columns=['text'])
+        real_corpus_df['label'] = 0
+
+        pseudo_corpus = self.truncate(self.crypto_corpus)
+        pseudo_corpus_df = pd.DataFrame(pseudo_corpus, columns=['text'])
+        pseudo_corpus_df['label'] = 1
+
+        all_texts = pd.concat([real_corpus_df, pseudo_corpus_df], ignore_index=True)
+        all_texts = shuffle(all_texts)
+        all_texts.reset_index(inplace=True)
+
+        return all_texts

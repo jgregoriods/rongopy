@@ -74,6 +74,10 @@ class LanguageModelSVC:
         if X_test is not None and y_test is not None:
             print('LinearSVC score:', self.classifier.score(X_test, y_test))
 
+    def predict(self, x):
+        probs = self.classifier.predict_proba(self.vectorizer.transform(x))
+        return probs
+
 
 if __name__ == '__main__':
     # SVC model
