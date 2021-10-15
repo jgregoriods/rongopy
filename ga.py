@@ -1,9 +1,9 @@
-import keras
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 
+from tensorflow import keras
 from time import time
 from math import ceil
 from random import shuffle, random, randint
@@ -14,9 +14,9 @@ from rapanui import corpus, syllables
 from stats import get_glyph_counts, get_syl_counts
 from language_models import vectorizer, preprocess
 
+from config import MAX_VERSE_LEN
+from explore.lang_stats import LangStats
 
-svc = pickle.load(open('models/svc_model', 'rb'))
-lstm = keras.models.load_model('models/lstm_model')
 
 selected = ['A', 'B', 'C', 'D', 'E', 'G', 'N', 'P', 'R', 'S']
 tablets_subset = {k: tablets_simple[k] for k in selected}
@@ -31,43 +31,6 @@ syls = list(syl_dict.keys())
 syls.sort(key=lambda x: syl_dict[x], reverse=True)
 
 key = {glyphs[i]: syls[i] for i in range(len(syls))}
-
-
-def decode_tablets(tablets, key, keep_lines=False):
-    if keep_lines:
-        decoded = {}
-        for tablet in tablets:
-            decoded[tablet] = {}
-            for line in tablets[tablet]:
-                decoded_line = []
-                for glyph in tablets[tablet][line].split('-'):
-                    if glyph in key:
-                        decoded_line.append(key[glyph])
-                    else:
-                        decoded_line.append(glyph)
-                decoded[tablet][line] = '-'.join(decoded_line)
-    else:
-        decoded = []
-        for tablet in tablets:
-            for line in tablets[tablet]:
-                decoded_line = []
-                for glyph in tablets[tablet][line].split('-'):
-                    if glyph in key:
-                        decoded_line.append(key[glyph])
-                    elif len(decoded_line) >= 10:
-                        decoded.append(' '.join(decoded_line))
-                        decoded_line = []
-    return decoded
-
-
-def get_fitness(decoded):
-    svc_probs = svc.predict_proba(vectorizer.transform(decoded))
-    svc_score = svc_probs.mean(axis=0)[0]
-
-    lstm_probs = lstm.predict(preprocess(decoded))
-    lstm_score = lstm_probs.mean(axis=0)[0]
-
-    return np.mean([svc_score, lstm_score])
 
 
 class Genome:
@@ -92,7 +55,10 @@ class Genome:
 
 
 class GeneticAlgorithm:
-    def __init__(self, pop_size, n_parents, n_elite, prob_cross, prob_mut):
+    def __init__(self, tablets, language_model, pop_size, n_parents, n_elite,
+                 prob_cross, prob_mut):
+        self.tablets = tablets
+        self.language_model = language_model
         self.pop_size = pop_size
         self.n_parents = n_parents
         self.n_elite = n_elite
@@ -138,6 +104,37 @@ class GeneticAlgorithm:
                     nodes[node].remove(next_node)
             child.append(next_node)
         return child
+
+    def decode(self, key, keep_lines=False):
+        if keep_lines:
+            decoded = {}
+            for tablet in self.tablets:
+                decoded[tablet] = {}
+                for line in self.tablets[tablet]:
+                    decoded_line = []
+                    for glyph in self.tablets[tablet][line].split('-'):
+                        if glyph in key:
+                            decoded_line.append(key[glyph])
+                        else:
+                            decoded_line.append(glyph)
+                    decoded[tablet][line] = '-'.join(decoded_line)
+        else:
+            decoded = []
+            for tablet in self.tablets:
+                for line in self.tablets[tablet]:
+                    decoded_line = []
+                    for glyph in self.tablets[tablet][line].split('-'):
+                        if glyph in key:
+                            decoded_line.append(key[glyph])
+                        elif len(decoded_line) >= MAX_VERSE_LEN:
+                            decoded.append(' '.join(decoded_line))
+                            decoded_line = []
+        return decoded
+
+    def get_fitness(self, decoded):
+        preprocessed = self.language_model.preprocess(decoded)
+        probs = self.language_model.predict(preprocessed)
+        return probs.mean(axis=0)[0]
 
     def evolve(self, generations):
         print('\nEvolving')

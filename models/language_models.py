@@ -137,6 +137,12 @@ class LanguageModelLSTM:
         self.vocab_size = 0
         self.model = None
 
+    def preprocess(self, text):
+        tokenized = self.tokenizer.texts_to_sequences(text)
+        padded = pad_sequences(tokenized, maxlen=MAX_VERSE_LEN,
+                               padding='post', truncating='post')
+        return padded
+
     def make_training_data(self, test_split):
         train_size = int(len(self.texts) * (1 - test_split))
 
@@ -148,15 +154,11 @@ class LanguageModelLSTM:
 
         self.tokenizer.fit_on_texts(self.texts)
         self.vocab_size = len(self.tokenizer.word_index) + 1
-        X_train = self.tokenizer.texts_to_sequences(X_train_raw)
-        X_test = self.tokenizer.texts_to_sequences(X_test_raw)
 
-        X_train_padded = pad_sequences(X_train, maxlen=MAX_VERSE_LEN,
-                                       padding='post', truncating='post')
-        X_test_padded = pad_sequences(X_test, maxlen=MAX_VERSE_LEN,
-                                      padding='post', truncating='post')
+        X_train = self.preprocess(X_train_raw)
+        X_test = self.preprocess(X_test_raw)
 
-        return X_train_padded, y_train, X_test_padded, y_test
+        return X_train, y_train, X_test, y_test
 
     def build(self, embedding_size, lstm_size, dropout):
         self.model = Sequential([
