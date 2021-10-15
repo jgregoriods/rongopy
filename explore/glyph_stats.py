@@ -30,6 +30,9 @@ class GlyphStats:
         df = pd.DataFrame(np.stack((glyph_list, percentages, cumulative_percentages), axis=1))
         df.columns = ['Glyph', 'Percent', 'Cumulative Percent']
         return df
+    
+    def get_top_n(self, n):
+        return self.get_percentages()['Glyph'].values[:n]
 
     def get_matrix(self, max_glyphs=50):
         transition_matrix = np.zeros((max_glyphs+1, max_glyphs+1))

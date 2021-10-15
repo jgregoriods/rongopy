@@ -6,18 +6,18 @@ import argparse
 from tensorflow import keras
 from time import time
 from math import ceil
-from random import shuffle, random, randint
+from random import random, randint
 from tqdm import tqdm
 
-from tablets import tablets_simple, tablets_clean
-from rapanui import corpus, syllables
-from stats import get_glyph_counts, get_syl_counts
-from language_models import vectorizer, preprocess
+#from tablets import tablets_simple, tablets_clean
+#from rapanui import corpus
+#from stats import get_glyph_counts, get_syl_counts
+#from language_models import vectorizer, preprocess
 
-from config import MAX_VERSE_LEN
+from config import MAX_VERSE_LEN, SYLLABLES
 from explore.lang_stats import LangStats
 
-
+"""
 selected = ['A', 'B', 'C', 'D', 'E', 'G', 'N', 'P', 'R', 'S']
 tablets_subset = {k: tablets_simple[k] for k in selected}
 
@@ -31,21 +31,16 @@ syls = list(syl_dict.keys())
 syls.sort(key=lambda x: syl_dict[x], reverse=True)
 
 key = {glyphs[i]: syls[i] for i in range(len(syls))}
-
+"""
 
 class Genome:
     def __init__(self, genes=None, score=None, freq=False):
-        rnd_syls = syls.copy()
+        random_syllables = SYLLABLES.copy()
         if not freq:
-            shuffle(rnd_syls)
+            np.random.shuffle(random_syllables)
         self.freq = freq
-        self.genes = genes or rnd_syls
+        self.genes = genes or random_syllables
         self.score = score
-
-    def get_score(self):
-        key = {glyphs[i]: self.genes[i] for i in range(len(syls))}
-        decoded = decode_tablets(tablets_subset, key)
-        self.score = get_fitness(decoded)
 
     def mutate(self):
         j, k = np.random.choice([i for i in range(len(self.genes) - 1)],
@@ -55,10 +50,11 @@ class Genome:
 
 
 class GeneticAlgorithm:
-    def __init__(self, tablets, language_model, pop_size, n_parents, n_elite,
+    def __init__(self, tablets, language_model, glyphs, pop_size, n_parents, n_elite,
                  prob_cross, prob_mut):
         self.tablets = tablets
         self.language_model = language_model
+        self.glyphs = glyphs
         self.pop_size = pop_size
         self.n_parents = n_parents
         self.n_elite = n_elite
@@ -70,7 +66,9 @@ class GeneticAlgorithm:
         self.genomes = [Genome() for i in range(self.pop_size)]
         for genome in tqdm(self.genomes):
             if genome.score is None:
-                genome.get_score()
+                key = {self.glyphs[i]: genome.genes[i] for i in range(len(SYLLABLES))}
+                decoded = self.decode(key)
+                genome.score = self.get_fitness(decoded)
         self.genomes.sort(key=lambda x: x.score, reverse=True)
         self.max_scores = [self.genomes[0].score]
         self.avg_scores = [np.mean([genome.score for genome in self.genomes])]
@@ -133,7 +131,7 @@ class GeneticAlgorithm:
 
     def get_fitness(self, decoded):
         preprocessed = self.language_model.preprocess(decoded)
-        probs = self.language_model.predict(preprocessed)
+        probs = self.language_model.model.predict(preprocessed)
         return probs.mean(axis=0)[0]
 
     def evolve(self, generations):
@@ -142,7 +140,7 @@ class GeneticAlgorithm:
             print(f'\nGeneration {i+1}')
             elite = self.genomes[:self.n_elite]
             parents = self.genomes[:self.n_parents]
-            shuffle(parents)
+            np.random.shuffle(parents)
             children = []
             for i in range(0, len(parents), 2):
                 parent1 = parents[i]
@@ -158,7 +156,9 @@ class GeneticAlgorithm:
                     children.append(child)
             for child in tqdm(children):
                 if child.score is None:
-                    child.get_score()
+                    key = {self.glyphs[i]: child.genes[i] for i in range(len(SYLLABLES))}
+                    decoded = self.decode(key)
+                    child.score = self.get_fitness(decoded)
             self.genomes = elite + children
             self.genomes.sort(key=lambda x: x.score, reverse=True)
             self.genomes = self.genomes[:self.pop_size]
@@ -166,8 +166,7 @@ class GeneticAlgorithm:
             self.avg_scores.append(np.mean([genome.score
                                             for genome in self.genomes]))
             print(f'Best: {self.max_scores[-1]}\tAvg: {self.avg_scores[-1]}')
-        self.best_key = {glyphs[i]: self.genomes[0].genes[i]
-                         for i in range(len(syls))}
+        self.best_key = {self.glyphs[i]: self.genomes[0].genes[i] for i in range(len(SYLLABLES))}
         plt.plot(self.max_scores)
         plt.plot(self.avg_scores)
         plt.show()
