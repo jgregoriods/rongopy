@@ -1,37 +1,10 @@
-import pickle
 import numpy as np
 import matplotlib.pyplot as plt
-import argparse
 
-from tensorflow import keras
-from time import time
-from math import ceil
-from random import random, randint
 from tqdm import tqdm
 
-#from tablets import tablets_simple, tablets_clean
-#from rapanui import corpus
-#from stats import get_glyph_counts, get_syl_counts
-#from language_models import vectorizer, preprocess
-
 from config import MAX_VERSE_LEN, SYLLABLES
-from explore.lang_stats import LangStats
 
-"""
-selected = ['A', 'B', 'C', 'D', 'E', 'G', 'N', 'P', 'R', 'S']
-tablets_subset = {k: tablets_simple[k] for k in selected}
-
-glyph_dict = get_glyph_counts(tablets_subset)
-glyphs = list(glyph_dict.keys())
-glyphs.sort(key=lambda x: glyph_dict[x], reverse=True)
-glyphs = glyphs[:50]
-
-syl_dict = get_syl_counts(corpus)
-syls = list(syl_dict.keys())
-syls.sort(key=lambda x: syl_dict[x], reverse=True)
-
-key = {glyphs[i]: syls[i] for i in range(len(syls))}
-"""
 
 class Genome:
     def __init__(self, genes=None, score=None, freq=False):
@@ -58,7 +31,7 @@ class GeneticAlgorithm:
         self.pop_size = pop_size
         self.n_parents = n_parents
         self.n_elite = n_elite
-        self.n_children = ceil(pop_size / n_parents * 2)
+        self.n_children = np.ceil(pop_size / n_parents * 2)
         self.prob_cross = prob_cross
         self.prob_mut = prob_mut
 
@@ -75,8 +48,8 @@ class GeneticAlgorithm:
         self.best_key = {}
 
     def ox1(self, parent1, parent2):
-        i = randint(0, len(parent1) - 1)
-        j = randint(i + 1, len(parent1))
+        i = np.random.randint(0, len(parent1) - 1)
+        j = np.random.randint(i + 1, len(parent1))
         segment = parent1[i:j]
         missing = [k for k in parent2 if k not in segment]
         pref, suff = missing[:i], missing[i:]
@@ -146,12 +119,12 @@ class GeneticAlgorithm:
                 parent1 = parents[i]
                 parent2 = parents[i+1]
                 for i in range(self.n_children):
-                    if random() < self.prob_cross:
+                    if np.random.random() < self.prob_cross:
                         new_genes = self.erx(parent1.genes, parent2.genes)
                         child = Genome(new_genes)
                     else:
                         child = Genome(parent1.genes, parent1.score)
-                    if random() < self.prob_mut:
+                    if np.random.random() < self.prob_mut:
                         child.mutate()
                     children.append(child)
             for child in tqdm(children):
@@ -170,28 +143,3 @@ class GeneticAlgorithm:
         plt.plot(self.max_scores)
         plt.plot(self.avg_scores)
         plt.show()
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--popSize', type=int, default=500)
-    parser.add_argument('-p', '--nParents', type=int, default=200)
-    parser.add_argument('-e', '--nElite', type=int, default=50)
-    parser.add_argument('-c', '--probCross', type=float, default=0.8)
-    parser.add_argument('-m', '--probMut', type=float, default=0.1)
-    parser.add_argument('-g', '--generations', type=int, default=200)
-
-    args = parser.parse_args()
-
-    ga = GeneticAlgorithm(pop_size=args.popSize, n_parents=args.nParents,
-                          n_elite=args.nElite, prob_cross=args.probCross,
-                          prob_mut=args.probMut)
-    ga.evolve(args.generations)
-
-    print(ga.best_key)
-    with open(f'ga{int(time())}.pickle', 'wb') as file:
-        pickle.dump(ga, file)
-
-
-if __name__ == '__main__':
-    main()

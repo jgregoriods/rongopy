@@ -1,18 +1,19 @@
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
+from config import TABLET_SUBSET
 
 from explore.glyph_stats import GlyphStats
 from explore.lang_stats import LangStats
-from models.language_models import LanguageModelSVC
+from models.language_models import CorpusLabeller, LanguageModelSVC, LanguageModelLSTM
 
-from data_loader import load_data
+from utils import load_data
 
 
-tablets = load_data('./tablets/tablets_clean.json')
-corpus = load_data('./language/corpus.txt')
+all_tablets = load_data('./tablets/tablets_clean.json')
+tablets = {tablet: all_tablets[tablet] for tablet in TABLET_SUBSET}
 
-"""
+raw_corpus = load_data('./language/corpus.txt')
+
+
 gs = GlyphStats(tablets)
 
 glyph_frequencies = gs.get_percentages()
@@ -23,11 +24,21 @@ glyph_matrix = gs.get_matrix()
 plt.imshow(glyph_matrix[:50, :50])
 plt.show()
 
-ls = LangStats(corpus)
+ls = LangStats(raw_corpus)
+corpus = ls.corpus
 
 syl_matrix = ls.get_matrix()
 plt.imshow(syl_matrix)
 plt.show()
-"""
 
-svc = LanguageModelSVC(corpus)
+cl = CorpusLabeller(corpus)
+labelled_texts = cl.labelled_texts
+
+svc = LanguageModelSVC(labelled_texts)
+X_train, y_train, X_test, y_test = svc.make_training_data(0.1)
+svc.train(X_train, y_train, X_test, y_test)
+
+lstm = LanguageModelLSTM(labelled_texts)
+X_train, y_train, X_test, y_test = lstm.make_training_data(0.1)
+lstm.build(32, 128, 0.2)
+lstm.train(X_train, y_train, 0.1, 100)
