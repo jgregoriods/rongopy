@@ -11,7 +11,7 @@ SYLLABLES = ["'a", "'e", "'i", "'o", "'u",
 
 VOWELS = 'aeiou'
 
-MAX_GLYPHS = 10     # length of input in the LSTM model
+MAX_GLYPHS = 20     # length of input in the LSTM model
 MIN_VERSE_LEN = 10
 MAX_VERSE_LEN = 50
 

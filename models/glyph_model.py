@@ -6,7 +6,8 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.callbacks import EarlyStopping
-
+from tensorflow.keras.optimizers import RMSprop
+from tensorflow.keras.regularizers import l2
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Embedding, LSTM, Dense, Dropout
 
@@ -15,7 +16,7 @@ from config import MAX_GLYPHS
 
 class GlyphModel:
     def __init__(self, raw_data):
-        self.tokenizer = Tokenizer(50, oov_token='<OOV>')
+        self.tokenizer = Tokenizer()
         self.vocab_size = 0
         self.raw_data = raw_data
         self.encoded_data = self.preprocess_data()
@@ -67,16 +68,17 @@ class GlyphModel:
     def build(self, embedding_size, lstm_size, dropout):
         self.model = Sequential([
             Embedding(self.vocab_size, embedding_size, input_length=MAX_GLYPHS),
+            LSTM(lstm_size, dropout=dropout, recurrent_dropout=dropout, return_sequences=True),
             LSTM(lstm_size),
-            Dropout(dropout),
+            Dense(lstm_size, activation='relu'),
             Dense(self.vocab_size, activation='softmax')
         ])
-
+        #optimizer = RMSprop(lr=0.1)
         self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     def train(self, X, y, validation_split, batch_size, epochs):
-        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=20)
-        self.history = self.model.fit(X, y, validation_split=validation_split, batch_size=batch_size, epochs=epochs, verbose=1, callbacks=[es])
+        es = EarlyStopping(monitor='val_accuracy', mode='max', verbose=1, patience=100)
+        self.history = self.model.fit(X, y, validation_split=validation_split, batch_size=batch_size, epochs=epochs, shuffle=True, verbose=1, callbacks=[es])
         plt.plot(self.history.history['val_accuracy'])
         plt.show()
 
