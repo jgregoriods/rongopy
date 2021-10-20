@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pickle
 
 from config import SYLLABLES, VOWELS
 
@@ -49,3 +50,7 @@ class LangStats:
             if row_total[i]:
                 transition_matrix[i] /= row_total[i]
         return transition_matrix
+
+    def save(self, filename):
+        with open(filename, 'wb') as f:
+            pickle.dump(self, f)

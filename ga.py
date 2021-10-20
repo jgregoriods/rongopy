@@ -31,17 +31,18 @@ class GeneticAlgorithm:
         self.pop_size = pop_size
         self.n_parents = n_parents
         self.n_elite = n_elite
-        self.n_children = np.ceil(pop_size / n_parents * 2)
+        self.n_children = int(np.ceil(pop_size / n_parents * 2))
         self.prob_cross = prob_cross
         self.prob_mut = prob_mut
 
-        print('\nInitializing population')
+        print('\nInitializing population...')
         self.genomes = [Genome() for i in range(self.pop_size)]
-        for genome in tqdm(self.genomes):
+        for genome in self.genomes:
             if genome.score is None:
                 key = {self.glyphs[i]: genome.genes[i] for i in range(len(SYLLABLES))}
                 decoded = self.decode(key)
                 genome.score = self.get_fitness(decoded)
+
         self.genomes.sort(key=lambda x: x.score, reverse=True)
         self.max_scores = [self.genomes[0].score]
         self.avg_scores = [np.mean([genome.score for genome in self.genomes])]
@@ -108,17 +109,16 @@ class GeneticAlgorithm:
         return probs.mean(axis=0)[0]
 
     def evolve(self, generations):
-        print('\nEvolving')
+        print('Evolving...')
         for i in range(generations):
-            print(f'\nGeneration {i+1}')
             elite = self.genomes[:self.n_elite]
             parents = self.genomes[:self.n_parents]
             np.random.shuffle(parents)
             children = []
-            for i in range(0, len(parents), 2):
-                parent1 = parents[i]
-                parent2 = parents[i+1]
-                for i in range(self.n_children):
+            for j in range(0, len(parents), 2):
+                parent1 = parents[j]
+                parent2 = parents[j+1]
+                for k in range(self.n_children):
                     if np.random.random() < self.prob_cross:
                         new_genes = self.erx(parent1.genes, parent2.genes)
                         child = Genome(new_genes)
@@ -127,9 +127,9 @@ class GeneticAlgorithm:
                     if np.random.random() < self.prob_mut:
                         child.mutate()
                     children.append(child)
-            for child in tqdm(children):
+            for child in children:
                 if child.score is None:
-                    key = {self.glyphs[i]: child.genes[i] for i in range(len(SYLLABLES))}
+                    key = {self.glyphs[x]: child.genes[x] for x in range(len(SYLLABLES))}
                     decoded = self.decode(key)
                     child.score = self.get_fitness(decoded)
             self.genomes = elite + children
@@ -138,8 +138,9 @@ class GeneticAlgorithm:
             self.max_scores.append(self.genomes[0].score)
             self.avg_scores.append(np.mean([genome.score
                                             for genome in self.genomes]))
-            print(f'Best: {self.max_scores[-1]}\tAvg: {self.avg_scores[-1]}')
+            print(f'\rGeneration {i+1}\tBest: {self.max_scores[-1]}\tAvg: {self.avg_scores[-1]}', end='')
         self.best_key = {self.glyphs[i]: self.genomes[0].genes[i] for i in range(len(SYLLABLES))}
+        print('\n')
         plt.plot(self.max_scores)
         plt.plot(self.avg_scores)
         plt.show()
