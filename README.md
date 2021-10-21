@@ -36,14 +36,39 @@ Jonas Gregorio de Souza<br/>
 
 <p>We start by loading the tablets and language corpus.</p>
 <p>The following artefacts were retained for the analysis: A, B, C, D, E, G, N, P, R and S. G was selected as inclusive of the text in K, and P was selected as representative of H-P-Q. The Santiago Staff (I) reflects a very particular genre and structure (also present in parts of G-K), and was left out of the analysis for now. The selection can be changed in the <code>config.py</code> file.</p>
-<p>The rongorongo corpus is provided as a dictionary with artefacts' names (letters) as keys. Values are themselves dictionaries with each line as key and a string of glyphs as value:</p> </p>
+<p>The rongorongo corpus is provided as a dictionary with artefacts' names (letters) as keys. Values are themselves dictionaries with each line as key and a string of glyphs as value:</p>
+
 ```python
 >>> from utils import load_data
 >>> from config import TABLET_SUBSET
->>>
+>>> 
 >>> all_tablets = load_data('./tablets/tablets_clean.json')
 >>> tablets = {tablet: all_tablets[tablet] for tablet in TABLET_SUBSET}
->>>
+>>> 
 >>> tablets['B']['Br1']
 '595-001-050-394-004-002-595-001-050-301-004-002-040-211-091-200-595-002-394-004-002-595-002-050-394-004-002-595-002-050-301-004-002-042-211-091-595-600-050-381-004-002-306-325-430-053-430-017-430-004-002-208-200-002-022-305-074-095-001-000-069'
+```
+
+<p>Once a particular set of texts is loaded, basic properties of the glyphs can be explored with the <code>GlyphStats</code> class. For example, the <code>get_percentages()</code> method returns a data frame with the ordered percentages and cumulative percentages of each glyph:</p>
+
+```python
+>>> from explore.glyph_stats import GlyphStats
+>>> 
+>>> glyph_stats = GlyphStats(tablets)
+>>> glyph_frequencies = glyph_stats.get_percentages()
+>>> glyph_frequencies
+    Glyph                 Percent   Cumulative Percent
+0     001     0.06461710452766908  0.06461710452766908
+1     002     0.03666852990497484  0.10128563443264393
+2     004     0.03566238121855785   0.1369480156512018
+3     003     0.03476802683063164  0.17171604248183342
+4     022     0.02615986584684181  0.19787590832867524
+..    ...                     ...                  ...
+541   682  0.00011179429849077697   0.9995528228060321
+542   555  0.00011179429849077697   0.9996646171045228
+543   576  0.00011179429849077697   0.9997764114030135
+544   587  0.00011179429849077697   0.9998882057015043
+545   635  0.00011179429849077697    0.999999999999995
+
+[546 rows x 3 columns]
 ```
