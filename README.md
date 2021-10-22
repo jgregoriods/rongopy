@@ -72,3 +72,27 @@ Jonas Gregorio de Souza<br/>
 
 [546 rows x 3 columns]
 ```
+
+<p>We see that the top 50 glyphs account for approximately 65% of the texts:</p>
+
+```python
+>>> glyph_frequencies.loc[[50]]
+   Glyph                Percent  Cumulative Percent
+50   711  0.0051425377305757405  0.6471771939631079
+```
+
+<p> Let's save a list with the top 50 glyphs to be used later in the genetic algorithm. This can be done with the <code>get_top_n()</code> method:</p>
+
+```python
+>>> top_glyphs = glyph_stats.get_top_n(50)
+```
+
+<p>Similarly, language properties can be analysed with the <code>LangStats</code> class. The Rapanui language corpus has been compiled ...</p>
+
+```python
+>>> from explore.lang_stats import LangStats
+>>> 
+>>> raw_corpus = load_data('./language/corpus.txt')
+>>> lang_stats = LangStats(raw_corpus)
+```
+
