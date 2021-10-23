@@ -4,11 +4,11 @@
 Jonas Gregorio de Souza<br/>
 [![ORCiD](https://img.shields.io/badge/ORCiD-0000--0001--7879--4531-green.svg)](https://orcid.org/0000-0001-6032-4443)<br/>
 
-[Background](#Background)
-[Approaches to decipherment](#Approaches)
-[Revising the glyph catalogue](#Revising)
-[Data exploration](#Exploration)
-[A machine learning approach to decipherment](#Machine)
+* [Background](#Background)
+* [Approaches to decipherment](#Approaches)
+* [Revising the glyph catalogue](#Revising)
+* [Data exploration](#Exploration)
+* [A machine learning approach to decipherment](#Machine)
 
 ## Background <a name="Background"></a>
 ### What is rongorongo?
