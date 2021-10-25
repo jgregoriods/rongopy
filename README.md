@@ -92,6 +92,7 @@ Jonas Gregorio de Souza<br/>
 ```
 
 <p>Similarly, language properties can be analysed with the <code>LangStats</code> class. The Rapanui language corpus has been compiled from Barthel (<a href="https://www.jstor.org/stable/40454429?origin=JSTOR-pdf">1960</a>), Englert (1948), Campbell (1971), Métraux (1971) and Fedorova (1978) (available <a href="https://starlingdb.org/kozmin/polynesia/rapanui.php">here</a>). These are short songs, lore and recitations most likely to represent the same genera as the rongorongo texts.</p>
+<p>Some preprocessing is automatically done to separate the verses into syllables.</p>
 
 ```python
 >>> from explore.lang_stats import LangStats
@@ -102,6 +103,65 @@ Jonas Gregorio de Souza<br/>
 >>> corpus = lang_stats.corpus
 ```
 
-<p>Some preprocessing is automatically done to separate the verses into syllables.</p>
-
 ## A machine learning approach to decipherment <a name="Machine"></a>
+
+<p>Given a sufficiently long text written in an unknown script, decipherment is achievable - provided the underlying language and type of writing system are known.</p>
+<p>Assuming that RoR is predominantly syllabic, as suggested by the glyph frequencies, one could employ a brute force approach and test different mappings of glyphs to syllables. The problem is one of verifyability - unless an entire text in clear, understandable Rapanui is produced, how to decide between different mappings? Indeed, this seems to be the favourite approach of many pseudo-decipherments, which eventually produce a few meaningful words but have to resort to implausible arguments to interpret longer passages.</p>
+<p>How to decide on the plausibility of a deciphered text? Here, I employ a support vector machine (SVM) classifier and a recurrent neural network (RNN) to predict whether a text is viable Rapanui.</p>
+<p>Models are trained on a corpus of (1) real Rapanui, and (2) pseudo-Rapanui verses created by encrypting the real verses with a substitution cypher (mapping to different syllables). I originally included two other categories - created by randomly concatenating syllables and by shuffling the syllables of real Rapanui verses. That resulted in models that were more difficult to train, so I left them out for now.</p>
+<p>Since there is no separation of words in RoR, all the texts were converted into continuous syllables separated by spaces (to facilitate tokenization). Texts were truncated to a maximum of 50 syllables (longer verses were split).</p>
+
+<p>The first step is to create a labelled corpus with the real and pseudo-Rapanui to train the language models. This is done in the <code>CorpusLabeller</code> class:</p>
+
+```python
+>>> corpus_labeller = CorpusLabeller(corpus)
+>>> labelled_texts = corpus_labeller.labelled_texts
+>>> 
+>>> labelled_texts
+     index                                               text  label
+0      229  ve hi 'i ru ma ha ru ko he 'e ru ru ta 'e ru p...      1
+1      296                      hi te ku po ku te ku ku hi te      1
+2      343  mi vu ri pe ki ko pu ke ka pi ge pi to go hi k...      1
+3      384  ha ti me 'i na ku ti hu gu te ne ve tu me ke t...      1
+4      124  ra ga te 'i vi ta 'i na ka 'i ri 'a hi va 'a t...      0
+..     ...                                                ...    ...
+411      0  ki 'a ki 'a ki 'a ki 'a ta ri ra 'u ku ma ra '...      0
+412     60  he ta ho ga no ta pu ku ta ho ga he ki 'a ki '...      0
+413    205  ko 'a ta mu te 'a ri ki tu mu 'i ho 'a 'o te m...      0
+414    351  hu ku hi gu vo ru 'e hu ko hu ko ro gu pi ku g...      1
+415    359  va ni ke no no hu go ho va tu va ma to no mu t...      1
+```
+
+<p>Where labels are 0 for real Rapanui and 1 for the pseudo-verses. Notice the data are randomly shuffled.</p>
+
+<p>The absence of word separation is a major drawback that prevents, for example, the application of the model designed by Luo et al. (<a href="http://dx.doi.org/10.18653/v1/P19-1303">2019</a>), which depends on matching cognates at the word level.</p>
+
+## LinearSVC and LSTM
+<p>Initially, a Linear Support Vector Classification (SVC) model was trained on the corpus with real Rapanui and the two pseudo datasets using an <i>n</i>-ngram range of 2 to 3 syllables. The classification achieves a validation accuracy above 95%. However, a problem that I found when using LinearSVC with a language like Rapanui (which has a very limited phonological inventory) is that it is very prone to misclassifying random concatenations of syllables that eventually contain Rapanui words, but which don't make sense as a sentence. Increasing the <i>n</i>-gram range did not solve this issue.</p>
+
+```python
+>>> svc = LanguageModelSVC(labelled_texts)
+>>> X_train, y_train, X_test, y_test = svc.make_training_data(0.1)
+>>> svc.train(X_train, y_train, X_test, y_test)
+LinearSVC score: 1.0
+```
+
+<p>Because the order in which words occur is crucial for deciding whether a sentence is valid Rapanui (beyond the mere frequency of <i>n</i>-grams), a potential solution is to train a Long Short-Term Memory (LSTM) network. The network has an embedding layer of size 32, a bidirectional LSTM layer of size 64, a dropout of 20% and a dense output layer of size 3 (real Rapanui and the two pseudo-corpora) with softmax activation. Other architectures are possible, but out of the ones I tried, this yielded the highest validation accuracy (70-80%).</p>
+<p>I used sklearn for the LinearSVC and tensorflow for the LSTM. Models can be loaded from the <code>models</code> folder.</p>
+
+```python
+>>> lstm = LanguageModelLSTM(labelled_texts)
+>>> X_train, y_train, X_test, y_test = lstm.make_training_data(0.1)
+>>> lstm.build(32, 128, 0.2)
+>>> lstm.train(X_train, y_train, 0.1, 50)
+...
+Epoch 50/50
+11/11 [==============================] - 0s 22ms/step - loss: 2.1150e-04 - accuracy: 1.0000 - val_loss: 0.1870 - val_accuracy: 0.9737
+```
+
+## Genetic algorithm
+<p>Every genome in the population is a sequence of syllables to be matched with the top 50 most frequent glyphs (ordered). I tested two methods: (1) initializing every genome to a different, random sequence, and (2) initializing every genome with the same sequence - ordered by the actual Rapanui syllable frequencies. I thought the latter could speed up the process, as a mapping that resulted in too different a syllable frequency from the actual language should score pretty low anyway.</p>
+<p>Because order is meaningful, I experimented with two different crossover methods - ordered crossover (OX1) and edge recombination crossover (ERX). Mutation involves swapping two random syllables. Originally, when initializing genomes based on the Rapanui syllable frequencies, I thought it was a good idea to only swap the syllables in immediate vicinity - but since OX1 and ERX were doing something similar, I reserved mutations for more drastic changes.</p>
+<p>Every genome (map of glyphs to syllables) is evaluated by decoding the selected RoR corpus and getting a mean of the scores of the LSTM and LinearSVC on the decoded text. In essence, the more Rapanui-like the decoded text, the higher the score should be. The text is split when unmapped glyphs are encountered (another solution could be mapping them to OOV), resulting in various lines. Those longer than 10 syllables are scored by the LSTM/LinearSVC, the final score of each model being an average of all decoded lines. There certainly are better procedures to get the fitness of a decoded text - this was just a quick solution.</p>
+<p>The genetic algorithm was run for 200 generations with a population of 500 genomes, 200 parents, 50 elite genomes and probabilities of crossover and mutation of 0.8 and 0.1 respectively. The graphs below show the maximum (orange) and average (blue) scores of the population (randomly initialized) when using ERX (left) and OX1 (right). One can see that the latter results in less drastic recombination, and thus in lower diversity. Maximum scores reach nearly 90% in both cases.</p>
+<img src="img/gas.png">
