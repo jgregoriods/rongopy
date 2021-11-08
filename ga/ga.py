@@ -1,5 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
+
+#from tensorflow.keras.models import load_model
 
 from config import MAX_VERSE_LEN, SYLLABLES
 
@@ -107,7 +110,7 @@ class GeneticAlgorithm:
         probs = self.language_model.model.predict(preprocessed)
         return probs.mean(axis=0)[0]
 
-    def evolve(self, generations):
+    def evolve(self, generations, early_stop=None):
         print('Evolving...')
         for i in range(generations):
             elite = self.genomes[:self.n_elite]
@@ -138,6 +141,8 @@ class GeneticAlgorithm:
             self.avg_scores.append(np.mean([genome.score
                                             for genome in self.genomes]))
             print('\rGeneration {}\tBest: {:.2f}\tAvg: {:.2f}'.format(i+1, self.max_scores[-1], self.avg_scores[-1]), end='')
+            if early_stop and len(self.max_scores) > early_stop and len(set(self.max_scores[-early_stop:])) == 1:
+                break
         self.best_key = {self.glyphs[i]: self.genomes[0].genes[i] for i in range(len(SYLLABLES))}
         print('\n')
 
@@ -148,3 +153,8 @@ class GeneticAlgorithm:
         plt.plot(self.avg_scores, color='black')
         plt.legend(['max score', 'avg score'])
         plt.show()
+
+    def save(self, filename):
+        self.language_model = None
+        with open(f'saved_models/{filename}.pickle', 'wb') as f:
+            pickle.dump(self, f)

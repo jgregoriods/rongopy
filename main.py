@@ -46,5 +46,6 @@ lstm.build(32, 128, 0.2)
 lstm.train(X_train, y_train, 0.1, 10)
 
 ga = GeneticAlgorithm(tablets, lstm, top_glyphs, 500, 200, 50, 0.8, 0.1)
-ga.evolve(200)
+ga.evolve(100, 10)
 ga.plot()
+ga.save('ga')

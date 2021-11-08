@@ -164,4 +164,22 @@ Epoch 50/50
 <p>Because order is meaningful, I experimented with two different crossover methods - ordered crossover (OX1) and edge recombination crossover (ERX). The latter remains in the code, but OX1 was ultimately used due to its resulting in less drastic recombinations. Mutation involves swapping two random syllables.</p>
 <p>Every genome (map of glyphs to syllables) is evaluated by decoding the selected RoR corpus and getting the LSTM probability of belonging to the "real Rapanui" class. In essence, the more Rapanui-like the decoded text, the higher the score should be. The text is split when unmapped glyphs are encountered (another solution could be mapping them to OOV), resulting in various lines. Those longer than 10 syllables are scored by the LSTM model, the final score being an average of all decoded lines.</p>
 <p>The genetic algorithm was run for 200 generations with a population of 500 genomes, 200 parents, 50 elite genomes and probabilities of crossover and mutation of 0.8 and 0.1 respectively. The graph shows the best (red) and average (black) scores of the population.</p>
-<img src="img/gas.png">
+
+```python
+>>> ga = GeneticAlgorithm(tablets, lstm, top_glyphs, 500, 200, 50, 0.8, 0.1)
+Initializing population...
+Done
+>>> ga.evolve(100, 10)
+Evolving...
+Generation 100	Best: 1.00	Avg: 1.00
+>>> ga.plot()
+```
+
+<img src="img/ga.png" width=400>
+
+<p>The best mapping of glyphs to syllables can be accessed in the <code>best_key</code> attribute:</p>
+
+```python
+>>> ga.best_key
+{'001': "'a", '002': 'ha', '004': 'ta', '003': 'ka', '022': "'i", '006': "'u", '600': "'e", '200': 'te', '005': 'ma', '010': 'mo', '700': 'va', '009': 'ku', '007': "'o", '380': 'vu', '040': 'ne', '008': 'he', '074': 'ho', '050': 'ga', '300': 'ki', '063': 'vi', '430': 'pe', '064': 'no', '020': 'po', '070': 'ti', '065': 'pa', '280': 'ni', '670': 'ra', '095': 'nu', '052': 'ge', '076': 'hu', '060': 've', '062': 'go', '048': 'hi', '522': 'ke', '044': 'pi', '053': 'tu', '067': 'ru', '306': 'pu', '091': 'gi', '061': 'me', '073': 'ro', '400': 'mi', '069': 'na', '381': 'gu', '066': 'vo', '011': 'ri', '059': 'mu', '450': 're', '025': 'ko', '027': 'to'}
+```
