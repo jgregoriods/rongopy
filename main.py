@@ -45,5 +45,5 @@ X_train, y_train, X_test, y_test = lstm.make_training_data(0.1)
 lstm.build(32, 128, 0.2)
 lstm.train(X_train, y_train, 0.1, 10)
 
-ga = GeneticAlgorithm(tablets, lstm, top_glyphs, 100, 50, 10, 0.8, 0.2)
-ga.evolve(10)
+ga = GeneticAlgorithm(tablets, lstm, top_glyphs, 500, 200, 50, 0.8, 0.1)
+ga.evolve(200)

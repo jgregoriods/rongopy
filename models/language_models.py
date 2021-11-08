@@ -175,5 +175,4 @@ class LanguageModelLSTM:
 
     def train(self, X, y, validation_split, epochs):
         self.history = self.model.fit(X, y, validation_split=validation_split, epochs=epochs, verbose=1)
-        plt.plot(self.history.history['val_accuracy'])
-        plt.show()
+

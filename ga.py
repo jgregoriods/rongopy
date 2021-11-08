@@ -1,17 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from tqdm import tqdm
-
 from config import MAX_VERSE_LEN, SYLLABLES
 
 
 class Genome:
-    def __init__(self, genes=None, score=None, freq=False):
+    def __init__(self, genes=None, score=None):
         random_syllables = SYLLABLES.copy()
-        if not freq:
-            np.random.shuffle(random_syllables)
-        self.freq = freq
+        np.random.shuffle(random_syllables)
         self.genes = genes or random_syllables
         self.score = score
 
@@ -35,20 +31,22 @@ class GeneticAlgorithm:
         self.prob_cross = prob_cross
         self.prob_mut = prob_mut
 
-        print('\nInitializing population...')
+        print('Initializing population...')
         self.genomes = [Genome() for i in range(self.pop_size)]
         for genome in self.genomes:
             if genome.score is None:
                 key = {self.glyphs[i]: genome.genes[i] for i in range(len(SYLLABLES))}
                 decoded = self.decode(key)
                 genome.score = self.get_fitness(decoded)
+        print('Done')
 
         self.genomes.sort(key=lambda x: x.score, reverse=True)
         self.max_scores = [self.genomes[0].score]
         self.avg_scores = [np.mean([genome.score for genome in self.genomes])]
         self.best_key = {}
 
-    def ox1(self, parent1, parent2):
+    def ox(self, parent1, parent2):
+        """ Order crossover """
         i = np.random.randint(0, len(parent1) - 1)
         j = np.random.randint(i + 1, len(parent1))
         segment = parent1[i:j]
@@ -57,6 +55,7 @@ class GeneticAlgorithm:
         return pref + segment + suff
 
     def erx(self, parent1, parent2):
+        """ Edge recombination crossover """
         nodes = {gene: set() for gene in parent1}
         for i in range(len(parent1) - 1):
             nodes[parent1[i]].add(parent1[i+1])
@@ -141,6 +140,11 @@ class GeneticAlgorithm:
             print(f'\rGeneration {i+1}\tBest: {self.max_scores[-1]}\tAvg: {self.avg_scores[-1]}', end='')
         self.best_key = {self.glyphs[i]: self.genomes[0].genes[i] for i in range(len(SYLLABLES))}
         print('\n')
-        plt.plot(self.max_scores)
-        plt.plot(self.avg_scores)
+
+    def plot(self):
+        plt.style.use('seaborn')
+        plt.axes(xlabel='generation', ylabel='score')
+        plt.plot(self.max_scores, color='#F8766D')
+        plt.plot(self.avg_scores, color='black')
+        plt.legend(['max score', 'avg score'])
         plt.show()
