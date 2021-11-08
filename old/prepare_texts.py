@@ -4,7 +4,7 @@ import pandas as pd
 from tensorflow.keras.preprocessing.text import Tokenizer
 from sklearn.utils import shuffle
 
-from rapanui import corpus
+from old.rapanui import corpus
 
 
 MIN_LEN = 10  # min number of syllables per verse
@@ -44,7 +44,8 @@ rnd['label'] = 1
 crp = pd.DataFrame(crypto_rapanui, columns=['text'])
 crp['label'] = 2
 
-data = pd.concat([real, rnd, crp], ignore_index=True)
+#data = pd.concat([real, rnd, crp], ignore_index=True)
+data = pd.concat([real, crp], ignore_index=True)
 data = shuffle(data)
 data.reset_index(inplace=True)
 
