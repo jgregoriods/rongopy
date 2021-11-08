@@ -42,7 +42,8 @@ Jonas Gregorio de Souza<br/>
 <p>The following artefacts were retained for the analysis: A, B, C, D, E, G, N, P, R and S. G was selected as inclusive of the text in K, and P was selected as representative of H-P-Q. The Santiago Staff (I) reflects a very particular genre and structure (also present in parts of G-K), and was left out of the analysis for now. The selection can be changed in the <code>config.py</code> file.</p>
 <p>The rongorongo corpus is provided as a dictionary with artefacts' names (letters) as keys. Values are themselves dictionaries with each line as key and a string of glyphs as value:</p>
 
-<pre><code class="language-python">>>> from utils import load_data
+{% highlight python %}
+>>> from utils import load_data
 >>> from config import TABLET_SUBSET
 >>> 
 >>> all_tablets = load_data('./tablets/tablets_clean.json')
@@ -50,7 +51,7 @@ Jonas Gregorio de Souza<br/>
 >>> 
 >>> tablets['B']['Br1']
 '595-001-050-394-004-002-595-001-050-301-004-002-040-211-091-200-595-002-394-004-002-595-002-050-394-004-002-595-002-050-301-004-002-042-211-091-595-600-050-381-004-002-306-325-430-053-430-017-430-004-002-208-200-002-022-305-074-095-001-000-069'
-</code></pre>
+{% endhighlight %}
 
 <p>Once a particular set of texts is loaded, basic properties of the glyphs can be explored with the <code>GlyphStats</code> class. For example, the <code>get_percentages()</code> method returns a data frame with the ordered percentages and cumulative percentages of each glyph:</p>
 
