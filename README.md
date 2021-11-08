@@ -37,7 +37,7 @@ Jonas Gregorio de Souza<br/>
 <p>Other examples can be found in Aa7:Ra3, Br9:Bv3, Bv3:Ra4, Bv8:Sa5, Bv7 and probably many other places.</p>
 <p>If anthropomorphic glyphs in standing (200/300), seating in profile (280/380) and seating in frontal view (240/340) position are allographs, should we view ornitomorphic glyphs in the same manner? For example,  should we treat glyphs in the 430/630 series as "profile" versions of the frontal ornitomorphs (400/600)? Pozdniakov (<a href="http://pozdniakov.free.fr/publications/2016_Correlation_of_graphical_features.pdf">2016</a>) seems to hint at that possibility for glyphs in the 430 series, even suggesting that Barthel (1958) probably thought so. Here, I have adopted that view, merging all anthropomorphs and most ornitomorphs (except for those in the 660 series) in the simplified corpus.</p>
 
-## Data exploration <a name="Exploration"></a>
+<h2>Data exploration <a name="Exploration"></a></h2>
 <p>We start by loading the tablets and language corpus.</p>
 <p>The following artefacts were retained for the analysis: A, B, C, D, E, G, N, P, R and S. G was selected as inclusive of the text in K, and P was selected as representative of H-P-Q. The Santiago Staff (I) reflects a very particular genre and structure (also present in parts of G-K), and was left out of the analysis for now. The selection can be changed in the <code>config.py</code> file.</p>
 <p>The rongorongo corpus is provided as a dictionary with artefacts' names (letters) as keys. Values are themselves dictionaries with each line as key and a string of glyphs as value:</p>
@@ -103,7 +103,7 @@ Jonas Gregorio de Souza<br/>
 >>> corpus = lang_stats.corpus
 ```
 
-## A machine learning approach to decipherment <a name="Machine"></a>
+<h2>A machine learning approach to decipherment <a name="Machine"></a></h2>
 
 <p>Given a sufficiently long text written in an unknown script, decipherment is achievable - provided the underlying language and type of writing system are known.</p>
 <p>Assuming that RoR is predominantly syllabic, as suggested by the glyph frequencies, one could employ a brute force approach and test different mappings of glyphs to syllables. The problem is one of verifyability - unless an entire text in clear, understandable Rapanui is produced, how to decide between different mappings? Indeed, this seems to be the favourite approach of many pseudo-decipherments, which eventually produce a few meaningful words but have to resort to implausible arguments to interpret longer passages.</p>
@@ -136,7 +136,7 @@ Jonas Gregorio de Souza<br/>
 
 <p>The absence of word separation is a major drawback that prevents, for example, the application of the model designed by Luo et al. (<a href="http://dx.doi.org/10.18653/v1/P19-1303">2019</a>), which depends on matching cognates at the word level.</p>
 
-## LinearSVC and LSTM
+<h3>LinearSVC and LSTM</h3>
 <p>Initially, a Linear Support Vector Classification (SVC) model was trained on the corpus with real Rapanui and the two pseudo datasets using an <i>n</i>-ngram range of 2 to 3 syllables. The classification achieves a validation accuracy above 95%. However, a problem that I found when using LinearSVC with a language like Rapanui (which has a very limited phonological inventory) is that it is very prone to misclassifying random concatenations of syllables that eventually contain Rapanui words, but which don't make sense as a sentence. Increasing the <i>n</i>-gram range did not solve this issue.</p>
 
 ```python
@@ -159,7 +159,7 @@ Epoch 50/50
 11/11 [==============================] - 0s 22ms/step - loss: 2.1150e-04 - accuracy: 1.0000 - val_loss: 0.1870 - val_accuracy: 0.9737
 ```
 
-## Genetic algorithm
+<h3>Genetic algorithm</h3>
 <p>Every genome in the population is a sequence of syllables to be matched with the top 50 most frequent glyphs.</p>
 <p>Because order is meaningful, I experimented with two different crossover methods - ordered crossover (OX1) and edge recombination crossover (ERX). The latter remains in the code, but OX1 was ultimately used due to its resulting in less drastic recombinations. Mutation involves swapping two random syllables.</p>
 <p>Every genome (map of glyphs to syllables) is evaluated by decoding the selected RoR corpus and getting the LSTM probability of belonging to the "real Rapanui" class. In essence, the more Rapanui-like the decoded text, the higher the score should be. The text is split when unmapped glyphs are encountered (another solution could be mapping them to OOV), resulting in various lines. Those longer than 10 syllables are scored by the LSTM model, the final score being an average of all decoded lines.</p>
