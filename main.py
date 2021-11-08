@@ -4,7 +4,7 @@ from config import TABLET_SUBSET
 from explore.glyph_stats import GlyphStats
 from explore.lang_stats import LangStats
 from models.language_models import CorpusLabeller, LanguageModelSVC, LanguageModelLSTM
-from ga import GeneticAlgorithm
+from ga.ga import GeneticAlgorithm
 
 from utils import load_data
 
@@ -21,8 +21,8 @@ print(glyph_frequencies)
 print(glyph_frequencies.loc[[50]])
 
 glyph_matrix = gs.get_matrix()
-plt.imshow(glyph_matrix[:50, :50])
-plt.show()
+#plt.imshow(glyph_matrix[:50, :50])
+#plt.show()
 
 top_glyphs = gs.get_top_n(50)
 
@@ -30,8 +30,8 @@ ls = LangStats(raw_corpus)
 corpus = ls.corpus
 
 syl_matrix = ls.get_matrix()
-plt.imshow(syl_matrix)
-plt.show()
+#plt.imshow(syl_matrix)
+#plt.show()
 
 cl = CorpusLabeller(corpus)
 labelled_texts = cl.labelled_texts
@@ -47,3 +47,4 @@ lstm.train(X_train, y_train, 0.1, 10)
 
 ga = GeneticAlgorithm(tablets, lstm, top_glyphs, 500, 200, 50, 0.8, 0.1)
 ga.evolve(200)
+ga.plot()

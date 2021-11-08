@@ -5,7 +5,7 @@ import pickle
 
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Embedding, Dense, LSTM, Dropout,\
                                     Bidirectional
 
@@ -130,6 +130,10 @@ class LanguageModelSVC:
     def predict(self, x):
         probs = self.classifier.predict_proba(self.vectorizer.transform(x))
         return probs
+    
+    def save(self, filename):
+        with open(filename, 'wb') as f:
+            pickle.dump(self, f)
 
 
 class LanguageModelLSTM:
@@ -174,5 +178,11 @@ class LanguageModelLSTM:
         self.model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     def train(self, X, y, validation_split, epochs):
-        self.history = self.model.fit(X, y, validation_split=validation_split, epochs=epochs, verbose=1)
+        self.model.fit(X, y, validation_split=validation_split, epochs=epochs, verbose=1)
 
+    def save(self, filename):
+        self.model.save(f'saved_models/lstm/{filename}')
+        self.model = None
+        with open(f'saved_models/{filename}.pickle', 'wb') as f:
+            pickle.dump(self, f)
+        self.model = load_model(f'saved_models/lstm/{filename}')

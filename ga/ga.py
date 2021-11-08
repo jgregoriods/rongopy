@@ -45,7 +45,7 @@ class GeneticAlgorithm:
         self.avg_scores = [np.mean([genome.score for genome in self.genomes])]
         self.best_key = {}
 
-    def ox(self, parent1, parent2):
+    def ox1(self, parent1, parent2):
         """ Order crossover """
         i = np.random.randint(0, len(parent1) - 1)
         j = np.random.randint(i + 1, len(parent1))
@@ -119,7 +119,7 @@ class GeneticAlgorithm:
                 parent2 = parents[j+1]
                 for k in range(self.n_children):
                     if np.random.random() < self.prob_cross:
-                        new_genes = self.erx(parent1.genes, parent2.genes)
+                        new_genes = self.ox1(parent1.genes, parent2.genes)
                         child = Genome(new_genes)
                     else:
                         child = Genome(parent1.genes, parent1.score)
@@ -137,7 +137,7 @@ class GeneticAlgorithm:
             self.max_scores.append(self.genomes[0].score)
             self.avg_scores.append(np.mean([genome.score
                                             for genome in self.genomes]))
-            print(f'\rGeneration {i+1}\tBest: {self.max_scores[-1]}\tAvg: {self.avg_scores[-1]}', end='')
+            print('\rGeneration {}\tBest: {:.2f}\tAvg: {:.2f}'.format(i+1, self.max_scores[-1], self.avg_scores[-1]), end='')
         self.best_key = {self.glyphs[i]: self.genomes[0].genes[i] for i in range(len(SYLLABLES))}
         print('\n')
 
