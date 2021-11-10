@@ -42,7 +42,7 @@ Jonas Gregorio de Souza<br/>
 <p>The following artefacts were retained for the analysis: A, B, C, D, E, G, N, P, R and S. G was selected as inclusive of the text in K, and P was selected as representative of H-P-Q. The Santiago Staff (I) reflects a very particular genre and structure (also present in parts of G-K), and was left out of the analysis for now. The selection can be changed in the <code>config.py</code> file.</p>
 <p>The rongorongo corpus is provided as a dictionary with artefacts' names (letters) as keys. Values are themselves dictionaries with each line as key and a string of glyphs as value:</p>
 
-```python
+{% highlight python %}
 >>> from utils import load_data
 >>> from config import TABLET_SUBSET
 >>> 
@@ -51,11 +51,11 @@ Jonas Gregorio de Souza<br/>
 >>> 
 >>> tablets['B']['Br1']
 '595-001-050-394-004-002-595-001-050-301-004-002-040-211-091-200-595-002-394-004-002-595-002-050-394-004-002-595-002-050-301-004-002-042-211-091-595-600-050-381-004-002-306-325-430-053-430-017-430-004-002-208-200-002-022-305-074-095-001-000-069'
-```
+{% endhighlight %}
 
 <p>Once a particular set of texts is loaded, basic properties of the glyphs can be explored with the <code>GlyphStats</code> class. For example, the <code>get_percentages()</code> method returns a data frame with the ordered percentages and cumulative percentages of each glyph:</p>
 
-```python
+{% highlight python %}
 >>> from explore.glyph_stats import GlyphStats
 >>> 
 >>> glyph_stats = GlyphStats(tablets)
@@ -75,37 +75,37 @@ Jonas Gregorio de Souza<br/>
 545   635  0.00011179429849077697    0.999999999999995
 
 [546 rows x 3 columns]
-```
+{% endhighlight %}
 
 <p>We see that the top 50 glyphs account for approximately 65% of the texts:</p>
 
-```python
+{% highlight python %}
 >>> glyph_frequencies.loc[[50]]
    Glyph                Percent  Cumulative Percent
 50   711  0.0051425377305757405  0.6471771939631079
-```
+{% endhighlight %}
 
 <p>This is the same number of syllables in the Rapanui language, suggesting that the script may be predominantly syllabic. Notice that this is without doing any further simplification to the glyph catalogue, in which case the cumulative percent of the top 50 glyphs would be even higher (you can redo the analysis loading <code>'./tablets/tablets_clean.json'</code>). Let's save a list with the top 50 glyphs to be used later in the genetic algorithm. This can be done with the <code>get_top_n()</code> method:</p>
 
-```python
+{% highlight python %}
 >>> top_glyphs = glyph_stats.get_top_n(50)
-```
+{% endhighlight %}
 
 <p>Similarly, language properties can be analysed with the <code>LangStats</code> class. The Rapanui language corpus has been compiled from Barthel (<a href="https://www.jstor.org/stable/40454429?origin=JSTOR-pdf">1960</a>), Englert (1948), Campbell (1971), Métraux (1971) and Fedorova (1978) (available <a href="https://starlingdb.org/kozmin/polynesia/rapanui.php">here</a>). These are short songs, lore and recitations most likely to represent the same genera as the rongorongo texts.</p>
 <p>Some preprocessing is automatically done to separate the verses into syllables.</p>
 
-```python
+{% highlight python %}
 >>> from explore.lang_stats import LangStats
 >>> 
 >>> raw_corpus = load_data('./language/corpus.txt')
 >>> lang_stats = LangStats(raw_corpus)
 >>> 
 >>> corpus = lang_stats.corpus
-```
+{% endhighlight %}
 
 <p>Before we move on to the language models and genetic algorithm, let's plot some transition matrices for the top 50 glyphs and syllables. We can obtain Markov matrices with the <code>get_matrix()</code> method:</p>
 
-```python
+{% highlight python %}
 >>> glyph_matrix = glyph_stats.get_matrix()
 >>> syl_matrix = lang_stats.get_matrix()
 >>> 
@@ -126,7 +126,7 @@ Jonas Gregorio de Souza<br/>
 >>> axes[1].set_yticklabels(SYLLABLES)
 >>> 
 >>> plt.show()
-```
+{% endhighlight %}
 
 <img src="img/matrices.png">
 
@@ -139,7 +139,7 @@ Jonas Gregorio de Souza<br/>
 
 <p>The first step is to create a labelled corpus with the real and pseudo-Rapanui to train the language models. This is done in the <code>CorpusLabeller</code> class:</p>
 
-```python
+{% highlight python %}
 >>> corpus_labeller = CorpusLabeller(corpus)
 >>> labelled_texts = corpus_labeller.labelled_texts
 >>> 
@@ -156,7 +156,7 @@ Jonas Gregorio de Souza<br/>
 413    205  ko 'a ta mu te 'a ri ki tu mu 'i ho 'a 'o te m...      0
 414    351  hu ku hi gu vo ru 'e hu ko hu ko ro gu pi ku g...      1
 415    359  va ni ke no no hu go ho va tu va ma to no mu t...      1
-```
+{% endhighlight %}
 
 <p>Where labels are 0 for real Rapanui and 1 for the pseudo-verses. Notice the data are randomly shuffled.</p>
 
@@ -165,17 +165,17 @@ Jonas Gregorio de Souza<br/>
 <h3>LinearSVC and LSTM</h3>
 <p>Initially, a Linear Support Vector Classification (SVC) model was trained on the corpus with real Rapanui and the two pseudo datasets using an <i>n</i>-ngram range of 2 to 6 syllables. The classification achieves a high validation accuracy (near 100%). However, a problem that I found when using LinearSVC with a language like Rapanui (which has a very limited phonological inventory) is that it is very prone to misclassifying random concatenations of syllables that eventually contain Rapanui words, but which don't make sense as a sentence. Increasing the <i>n</i>-gram range did not solve this issue.</p>
 
-```python
+{% highlight python %}
 >>> svc = LanguageModelSVC(labelled_texts)
 >>> X_train, y_train, X_test, y_test = svc.make_training_data(0.1)
 >>> svc.train(X_train, y_train, X_test, y_test)
 LinearSVC score: 1.0
-```
+{% endhighlight %}
 
 <p>Because the order in which words occur is crucial for deciding whether a sentence is valid Rapanui (beyond the mere frequency of <i>n</i>-grams), a potential solution is to train a Long Short-Term Memory (LSTM) network. The network was built with an embedding layer of size 32, a bidirectional LSTM layer of size 128, a dropout of 20% and a dense output layer of size 2 (real Rapanui and the pseudo-corpus) with softmax activation. Other architectures are possible, but this yielded a high validation accuracy (over 95%).</p>
 <p>I used sklearn for the LinearSVC and tensorflow for the LSTM. Models can be loaded from the <code>models</code> folder.</p>
 
-```python
+{% highlight python %}
 >>> lstm = LanguageModelLSTM(labelled_texts)
 >>> X_train, y_train, X_test, y_test = lstm.make_training_data(0.1)
 >>> lstm.build(32, 128, 0.2)
@@ -183,7 +183,7 @@ LinearSVC score: 1.0
 ...
 Epoch 50/50
 11/11 [==============================] - 0s 22ms/step - loss: 2.1150e-04 - accuracy: 1.0000 - val_loss: 0.1870 - val_accuracy: 0.9737
-```
+{% endhighlight %}
 
 <h3>Genetic algorithm</h3>
 <p>Every genome in the population is a sequence of syllables to be matched with the top 50 most frequent glyphs.</p>
@@ -191,7 +191,7 @@ Epoch 50/50
 <p>Every genome (map of glyphs to syllables) is evaluated by decoding the selected RoR corpus and getting the LSTM probability of belonging to the "real Rapanui" class. In essence, the more Rapanui-like the decoded text, the higher the score should be. The text is split when unmapped glyphs are encountered (another solution could be mapping them to OOV), resulting in various lines. Those longer than 10 syllables are scored by the LSTM model, the final score being an average of all decoded lines.</p>
 <p>The genetic algorithm was run for 100 generations with a population of 500 genomes, 200 parents, 50 elite genomes and probabilities of crossover and mutation of 0.8 and 0.1 respectively. The graph shows the best (red) and average (black) scores of the population.</p>
 
-```python
+{% highlight python %}
 >>> ga = GeneticAlgorithm(tablets, lstm, top_glyphs, 500, 200, 50, 0.8, 0.1)
 Initializing population...
 Done
@@ -199,13 +199,13 @@ Done
 Evolving...
 Generation 100	Best: 1.00	Avg: 1.00
 >>> ga.plot()
-```
+{% endhighlight %}
 
 <img src="img/ga.png" width=400>
 
 <p>The best mapping of glyphs to syllables can be accessed in the <code>best_key</code> attribute:</p>
 
-```python
+{% highlight python %}
 >>> ga.best_key
 {'001': "'a", '002': 'ha', '004': 'ta', '003': 'ka', '022': "'i", '006': "'u", '600': "'e", '200': 'te', '005': 'ma', '010': 'mo', '700': 'va', '009': 'ku', '007': "'o", '380': 'vu', '040': 'ne', '008': 'he', '074': 'ho', '050': 'ga', '300': 'ki', '063': 'vi', '430': 'pe', '064': 'no', '020': 'po', '070': 'ti', '065': 'pa', '280': 'ni', '670': 'ra', '095': 'nu', '052': 'ge', '076': 'hu', '060': 've', '062': 'go', '048': 'hi', '522': 'ke', '044': 'pi', '053': 'tu', '067': 'ru', '306': 'pu', '091': 'gi', '061': 'me', '073': 'ro', '400': 'mi', '069': 'na', '381': 'gu', '066': 'vo', '011': 'ri', '059': 'mu', '450': 're', '025': 'ko', '027': 'to'}
-```
+{% endhighlight %}
