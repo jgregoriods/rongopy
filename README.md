@@ -85,7 +85,7 @@ Jonas Gregorio de Souza<br/>
 50   711  0.0051425377305757405  0.6471771939631079
 ```
 
-<p> Let's save a list with the top 50 glyphs to be used later in the genetic algorithm. This can be done with the <code>get_top_n()</code> method:</p>
+<p>This is the same number of syllables in the Rapanui language, suggesting that the script may be predominantly syllabic. Notice that this is without doing any further simplification to the glyph catalogue, in which case the cumulative percent of the top 50 glyphs would be even higher (you can redo the analysis loading <code>'./tablets/tablets_clean.json'</code>). Let's save a list with the top 50 glyphs to be used later in the genetic algorithm. This can be done with the <code>get_top_n()</code> method:</p>
 
 ```python
 >>> top_glyphs = glyph_stats.get_top_n(50)
@@ -103,12 +103,38 @@ Jonas Gregorio de Souza<br/>
 >>> corpus = lang_stats.corpus
 ```
 
+<p>Before we move on to the language models and genetic algorithm, let's plot some transition matrices for the top 50 glyphs and syllables. We can obtain Markov matrices with the <code>get_matrix()</code> method:</p>
+
+```python
+>>> glyph_matrix = glyph_stats.get_matrix()
+>>> syl_matrix = lang_stats.get_matrix()
+>>> 
+>>> fig, axes = plt.subplots(1, 2)
+>>> 
+>>> axes[0].imshow(glyph_matrix[:50, :50])
+>>> axes[0].title.set_text('Glyph bigrams')
+>>> axes[0].set_xticks(list(range(50)))
+>>> axes[0].set_yticks(list(range(50)))
+>>> axes[0].set_xticklabels(top_glyphs, rotation=90)
+>>> axes[0].set_yticklabels(top_glyphs)
+>>> 
+>>> axes[1].imshow(syl_matrix)
+>>> axes[1].title.set_text('Syllable bigrams')
+>>> axes[1].set_xticks(list(range(50)))
+>>> axes[1].set_yticks(list(range(50)))
+>>> axes[1].set_xticklabels(SYLLABLES, rotation=90)
+>>> axes[1].set_yticklabels(SYLLABLES)
+>>> 
+>>> plt.show()
+```
+
+<img src="img/matrices.png">
+
 <h2>A machine learning approach to decipherment <a name="Machine"></a></h2>
 
-<p>Given a sufficiently long text written in an unknown script, decipherment is achievable - provided the underlying language and type of writing system are known.</p>
-<p>Assuming that RoR is predominantly syllabic, as suggested by the glyph frequencies, one could employ a brute force approach and test different mappings of glyphs to syllables. The problem is one of verifyability - unless an entire text in clear, understandable Rapanui is produced, how to decide between different mappings? Indeed, this seems to be the favourite approach of many pseudo-decipherments, which eventually produce a few meaningful words but have to resort to implausible arguments to interpret longer passages.</p>
-<p>How to decide on the plausibility of a deciphered text? Here, I employ a support vector machine (SVM) classifier and a recurrent neural network (RNN) to predict whether a text is viable Rapanui.</p>
-<p>Models are trained on a corpus of (1) real Rapanui, and (2) pseudo-Rapanui verses created by encrypting the real verses with a substitution cypher (mapping to different syllables). I originally included two other categories - created by randomly concatenating syllables and by shuffling the syllables of real Rapanui verses. That resulted in models that were more difficult to train, so I left them out for now.</p>
+<p>Given a sufficiently long text written in an unknown script, decipherment is achievable - provided the underlying language and type of writing system are known. Many automated approaches to decipherment focus on maximising the likelihood of a translated text or vocabulary given a mapping of glyphs to phonemes, with the score given by a language model (<a href="https://aclanthology.org/W99-0906/">Knight and Yamada 1999</a>; <a href="https://aclanthology.org/P10-1107/">Snyder et al. 2010</a>; Berg-Kirkpatrick and Klein <a href="https://aclanthology.org/D11-1029/">2011</a>, <a href="https://aclanthology.org/D13-1087/">2013</a>; <a href="https://arxiv.org/abs/1906.06718">Luo et al. 2019</a>).</p>
+<p>Assuming that RoR is predominantly syllabic, as suggested by the glyph frequencies, one could perform a search (e.g. using genetic algorithms) through different mappings of glyphs to syllables. The problem is one of verifyability. How to decide on the plausibility of a deciphered text? Here, I tested a support vector machine (SVM) classifier and a Long Short-Term Memory (LSTM) neural network to predict whether a text is viable Rapanui.</p>
+<p>Models were trained on a corpus of (1) real Rapanui, and (2) pseudo-Rapanui verses created by encrypting the real verses with a substitution cypher (mapping to different syllables). I originally included two other categories - created by randomly concatenating syllables and by shuffling the syllables of real Rapanui verses. That resulted in models that were more difficult to train, so I left them out for now.</p>
 <p>Since there is no separation of words in RoR, all the texts were converted into continuous syllables separated by spaces (to facilitate tokenization). Texts were truncated to a maximum of 50 syllables (longer verses were split).</p>
 
 <p>The first step is to create a labelled corpus with the real and pseudo-Rapanui to train the language models. This is done in the <code>CorpusLabeller</code> class:</p>
@@ -137,7 +163,7 @@ Jonas Gregorio de Souza<br/>
 <p>The absence of word separation is a major drawback that prevents, for example, the application of the model designed by Luo et al. (<a href="http://dx.doi.org/10.18653/v1/P19-1303">2019</a>), which depends on matching cognates at the word level.</p>
 
 <h3>LinearSVC and LSTM</h3>
-<p>Initially, a Linear Support Vector Classification (SVC) model was trained on the corpus with real Rapanui and the two pseudo datasets using an <i>n</i>-ngram range of 2 to 3 syllables. The classification achieves a validation accuracy above 95%. However, a problem that I found when using LinearSVC with a language like Rapanui (which has a very limited phonological inventory) is that it is very prone to misclassifying random concatenations of syllables that eventually contain Rapanui words, but which don't make sense as a sentence. Increasing the <i>n</i>-gram range did not solve this issue.</p>
+<p>Initially, a Linear Support Vector Classification (SVC) model was trained on the corpus with real Rapanui and the two pseudo datasets using an <i>n</i>-ngram range of 2 to 6 syllables. The classification achieves a high validation accuracy (near 100%). However, a problem that I found when using LinearSVC with a language like Rapanui (which has a very limited phonological inventory) is that it is very prone to misclassifying random concatenations of syllables that eventually contain Rapanui words, but which don't make sense as a sentence. Increasing the <i>n</i>-gram range did not solve this issue.</p>
 
 ```python
 >>> svc = LanguageModelSVC(labelled_texts)
@@ -146,7 +172,7 @@ Jonas Gregorio de Souza<br/>
 LinearSVC score: 1.0
 ```
 
-<p>Because the order in which words occur is crucial for deciding whether a sentence is valid Rapanui (beyond the mere frequency of <i>n</i>-grams), a potential solution is to train a Long Short-Term Memory (LSTM) network. The network has an embedding layer of size 32, a bidirectional LSTM layer of size 64, a dropout of 20% and a dense output layer of size 3 (real Rapanui and the two pseudo-corpora) with softmax activation. Other architectures are possible, but out of the ones I tried, this yielded the highest validation accuracy (70-80%).</p>
+<p>Because the order in which words occur is crucial for deciding whether a sentence is valid Rapanui (beyond the mere frequency of <i>n</i>-grams), a potential solution is to train a Long Short-Term Memory (LSTM) network. The network was built with an embedding layer of size 32, a bidirectional LSTM layer of size 128, a dropout of 20% and a dense output layer of size 2 (real Rapanui and the pseudo-corpus) with softmax activation. Other architectures are possible, but this yielded a high validation accuracy (over 95%).</p>
 <p>I used sklearn for the LinearSVC and tensorflow for the LSTM. Models can be loaded from the <code>models</code> folder.</p>
 
 ```python
@@ -163,7 +189,7 @@ Epoch 50/50
 <p>Every genome in the population is a sequence of syllables to be matched with the top 50 most frequent glyphs.</p>
 <p>Because order is meaningful, I experimented with two different crossover methods - ordered crossover (OX1) and edge recombination crossover (ERX). The latter remains in the code, but OX1 was ultimately used due to its resulting in less drastic recombinations. Mutation involves swapping two random syllables.</p>
 <p>Every genome (map of glyphs to syllables) is evaluated by decoding the selected RoR corpus and getting the LSTM probability of belonging to the "real Rapanui" class. In essence, the more Rapanui-like the decoded text, the higher the score should be. The text is split when unmapped glyphs are encountered (another solution could be mapping them to OOV), resulting in various lines. Those longer than 10 syllables are scored by the LSTM model, the final score being an average of all decoded lines.</p>
-<p>The genetic algorithm was run for 200 generations with a population of 500 genomes, 200 parents, 50 elite genomes and probabilities of crossover and mutation of 0.8 and 0.1 respectively. The graph shows the best (red) and average (black) scores of the population.</p>
+<p>The genetic algorithm was run for 100 generations with a population of 500 genomes, 200 parents, 50 elite genomes and probabilities of crossover and mutation of 0.8 and 0.1 respectively. The graph shows the best (red) and average (black) scores of the population.</p>
 
 ```python
 >>> ga = GeneticAlgorithm(tablets, lstm, top_glyphs, 500, 200, 50, 0.8, 0.1)

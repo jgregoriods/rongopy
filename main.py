@@ -6,6 +6,7 @@ from explore.lang_stats import LangStats
 from models.language_models import CorpusLabeller, LanguageModelSVC, LanguageModelLSTM
 from ga.ga import GeneticAlgorithm
 
+from config import SYLLABLES
 from utils import load_data
 
 
@@ -20,18 +21,31 @@ glyph_frequencies = gs.get_percentages()
 print(glyph_frequencies)
 print(glyph_frequencies.loc[[50]])
 
-glyph_matrix = gs.get_matrix()
-#plt.imshow(glyph_matrix[:50, :50])
-#plt.show()
-
 top_glyphs = gs.get_top_n(50)
 
 ls = LangStats(raw_corpus)
 corpus = ls.corpus
 
+glyph_matrix = gs.get_matrix()
 syl_matrix = ls.get_matrix()
-#plt.imshow(syl_matrix)
-#plt.show()
+
+fig, axes = plt.subplots(1, 2)
+
+axes[0].imshow(glyph_matrix[:50, :50])
+axes[0].title.set_text('Glyph bigrams')
+axes[0].set_xticks(list(range(50)))
+axes[0].set_yticks(list(range(50)))
+axes[0].set_xticklabels(top_glyphs, rotation=90)
+axes[0].set_yticklabels(top_glyphs)
+
+axes[1].imshow(syl_matrix)
+axes[1].title.set_text('Syllable bigrams')
+axes[1].set_xticks(list(range(50)))
+axes[1].set_yticks(list(range(50)))
+axes[1].set_xticklabels(SYLLABLES, rotation=90)
+axes[1].set_yticklabels(SYLLABLES)
+
+plt.show()
 
 cl = CorpusLabeller(corpus)
 labelled_texts = cl.labelled_texts
