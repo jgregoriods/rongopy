@@ -1,0 +1,41 @@
+Top 5 glyphs
+6
+1
+10
+4
+600
+
+Top 5 glyph starters
+('<s>', '4')
+('<s>', '600')
+('<s>', '10')
+('<s>', '6')
+('<s>', '1')
+
+Top 5 glyph enders
+('1', '</s>')
+('4', '</s>')
+('10', '</s>')
+('6', '</s>')
+('711', '</s>')
+
+Top 5 syllables
+a
+i
+ka
+e
+u
+
+Top 5 syllable starters
+('<s>', 'ka')
+('<s>', 'e')
+('<s>', 'ko')
+('<s>', 'i')
+('<s>', 'a')
+
+Top 5 syllable enders
+('e', '</s>')
+('a', '</s>')
+('i', '</s>')
+('ga', '</s>')
+('na', '</s>')
