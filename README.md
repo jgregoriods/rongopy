@@ -1,211 +1,134 @@
 <h1>rongopy</h1>
-<h3>Ideas for the decipherment of rongorongo using machine learning and genetic algorithms in Python</h3>
+<h3>Ideas for the decipherment of rongorongo using machine learning in Python</h3>
 
 Jonas Gregorio de Souza<br/>
 [![ORCiD](https://img.shields.io/badge/ORCiD-0000--0001--7879--4531-green.svg)](https://orcid.org/0000-0001-6032-4443)<br/>
 
 * [Background](#Background)
 * [Approaches to decipherment](#Approaches)
-* [Revising the glyph catalogue](#Revising)
-* [Data exploration](#Exploration)
-* [A machine learning approach to decipherment](#Machine)
+* [2023 Update](#Update)
 
 <h2>Background <a name="Background"></a></h2>
 <h3>What is rongorongo?</h3>
-<img src="img/key.png" align="left">
 <p>Rongorongo (henceforth RoR) is an undeciphered glyph system from Easter Island. The very nature of RoR as true writing is debated. In the past, the prevalent view was that the glyphs were a mnemonic device and were unrelated to the specific words of the chants they were meant to recall (Métraux 1957; Routledge 1919). Nowadays, most scholars assume that the system was either logographic, with a few phonetic complements (<a href="https://doi.org/10.3406/jso.1990.2882">Guy 1990,</a> <a href="https://kahualike.manoa.hawaii.edu/rnj/vol20/iss1/9/">2006</a>; <a href="https://www.jstor.org/stable/20706625">Fischer 1995a</a>), or predominantly syllabic, with certain glyphs working as determinatives or logograms (<a href="https://doi.org/10.3406/jso.1996.1995">Pozdniakov 1996</a>; <a href="http://pozdniakov.free.fr/publications/2007_Rapanui_Writing_and_the_Rapanui_Language.pdf">Pozdniakov and Pozdniakov 2007</a>; <a href="https://kahualike.manoa.hawaii.edu/rnj/vol19/iss2/6/">Horley 2005,</a><a href="https://kahualike.manoa.hawaii.edu/rnj/vol21/iss1/7/"> 2007</a>).</p>
 
 <p>The canonical RoR corpus is comprised of texts carved on 20 wooden tablets, one staff, two <i>reimiro</i> (pectoral adornments), one birdman sculpture (<i>tagata manu</i>), and one snuffbox (assembled from an earlier tablet). A bark-cloth fragment has recently been recognized as another genuine inscription (<a href="ps://www.sav.sk/index.php?lang=sk&doc=journal-list&part=article_response_page&journal_article_no=17609">Schoch and Melka 2019</a>). The texts are repetitive, with three tablets (H, P, Q) containing the same text. Certain sequences of glyphs, some of them quite long, appear in multiple artefacts.<p>
 <p>The only RoR passage whose meaning is thought to be understood by most scholars is the lunar calendar on tablet <i>Mamari</i> (<a href="https://doi.org/10.3406/jso.1990.2882">Guy 1990</a>; <a href="https://doi.org/10.4000/jso.6314">Horley 2011</a>; but see <a href="https://doi.org/10.15286/jps.121.3.243-274">Davletshin 2012b</a>). Repeated crescent-shaped glyphs are combined with other signs, presumably phonetic complements used to spell the names of the nights.</p>
 <p>The antiquity of the system is another point of contention (<a href="http://www.jstor.org/stable/20706648">Langdon and Fischer 1996</a>). Most of the artefacts appear to be recent. Three tablets were carved on European oars, and the only radiocarbon measurement available (for tablet Q, Small St. Petersburg) points to the 19th century (<a href="https://doi.org/10.1002/j.1834-4453.2005.tb00597.x">Orliac 2005</a>). If, however, RoR can be proven earlier than the European encounter and its function as real writing can be ascertained, this would be a remarkable finding - one of the rare cases of independent invention of writing in the world.</p>
-<p>On this website and <a href="https://github.com/jgregoriods/rongopy">repository</a>, I offer some thoughts on a machine-learning approach towards decipherment, alongside the data (RoR corpus that can be loaded in Python) and code. This is not another claim to decipherment, as I don't think the results were satisfactory, but the method is promising and can perhaps inspire others.</p>
+<p>On this website and <a href="https://github.com/jgregoriods/rongopy">repository</a>, I offer some thoughts on a machine-learning approach towards decipherment, alongside the data (RoR corpus that can be loaded in Python) and code. This is not another claim to decipherment, as I don't think the results were acceptable, but the method is promising and can perhaps inspire others.</p>
 
 <h2>Approaches to decipherment <a name="Approaches"></a></h2>
+
 <p>The earliest attempts at decipherment, still in the 19th century, took advantage of the fact that informants were still alive who had presumably been instructed in RoR - or at least heard the tablets being recited (Routledge 1919). Two informants, named Metoro and Ure Vaeiko, provided readings for entire tablets (Thompson 1889; Jaussen 1893). Metoro's readings - apparently just a description of the objects depicted by individual glyphs - formed the basis for Thomas Barthel's interpretation of RoR (Barthel 1958).</p>
+
 <p>Yuri Knorozov, famous for the decipherment of Maya glyphs, was later involved with other Soviet scholars in the study of RoR (Butinov and Knorozov 1957). Their understanding was that RoR was a mixed writing with logograms and phonetic complements, similar to other hieroglyphic systems.</p>
+
 <p>The many publications of Jacques Guy opened several routes to decipherment. Most importantly, we must mention the recognition of potential taxograms or determinatives (<a href="https://kahualike.manoa.hawaii.edu/rnj/vol20/iss1/9/">Guy 2006</a>) and the interpretation of the structure of the lunar calendar in tablet <i>Mamari</i>, including a number of plausible phonetic readings for signs that accompany the moon glyphs (<a href="https://doi.org/10.3406/jso.1990.2882">Guy 1990</a>).</p>
+
 <p>In the 1990s, Steven R. Fischer brought renewed attention to the field with his purported decipherment. Based on similarities with the structure of a cosmogonic chant recited by Ure Vaeiko, Fischer read a series of procreation triads in the Santiago Staff (<a href="https://kahualike.manoa.hawaii.edu/rnj/vol9/iss4/1/">Fischer 1995a</a>) and other tablets (<a href="https://www.jstor.org/stable/20706625">Fischer 1995b</a>). His work, however, was heavily criticized by other RoR scholars (<a href="https://doi.org/10.3406/jso.1998.2041">Guy 1998</a>; <a href="https://doi.org/10.3406/jso.1996.1995">Pozdniakov 1996</a>).</p>
-<p>The recent work by the Pozdniakovs (<a href="https://doi.org/10.3406/jso.1996.1995">Pozdniakov 1996</a>; <a href="http://pozdniakov.free.fr/publications/2007_Rapanui_Writing_and_the_Rapanui_Language.pdf">Pozdniakov and Pozdniakov 2007</a>) and Paul Horley (<a href="https://kahualike.manoa.hawaii.edu/rnj/vol19/iss2/6/">2005</a>, <a href="https://kahualike.manoa.hawaii.edu/rnj/vol21/iss1/7/">2007</a>) is focused on simplifying Barthel's catalogue by isolating the basic glyphs in RoR and comparing glyph and Rapanui syllable statistics. Similarly, Albert Davletshin (<a href="https://doi.org/10.4000/jso.6658">Davletshin 2012a</a>, <a href="https://doi.org/10.15286/jps.121.3.243-274">2012b</a>) has been attempting to separate syllabograms and logograms in RoR based on glyph combinatorial properties.</p>
-<p>Finally, Martyn Harris and Tomi Melka have been moving the field in the direction of machine learning and natural language processing with  <i>n</i>-gram collocation and latent semantic analysis (LSA) (<a href="https://doi.org/10.1080/09296174.2011.556003">Harris and Melka 2011a</a>, <a href="https://doi.org/10.1080/09296174.2011.581850">2011b</a>).</p>
 
-<h2>Revising the glyph catalogue <a name="Revising"></a></h2>
-<p>A sound statistical analysis of RoR depends on the correct transliteration of the texts. Unfortunately, the system devised by Barthel (1958) exaggerates the quantity of glyphs by assigning different numbers to allographs and ligatures. In fact, a quick experiment showed me that, after differentiating the most obvious allographs and separating the most obvious ligatures (e.g. anthropomorphs and ornitomorphs with various hand shapes), we are left with about 50 glyphs accounting for over 90% of the corpus - a number surprisingly close to the number of Rapanui syllables.</p>
-<p>Martha Macri (1996), the Pozdniakovs (<a href="http://pozdniakov.free.fr/publications/2007_Rapanui_Writing_and_the_Rapanui_Language.pdf">2007</a>) and Paul Horley (<a href="https://kahualike.manoa.hawaii.edu/rnj/vol19/iss2/6/">2005</a>) have all attempted to simplify Barthel's catalogue, arriving at pretty similar solutions. Horley offers the most radical restructuring, e.g. considering the anthropomorphic and ornitomorphic glyphs' heads as independent signs. For creating the "simplified" corpus, I mostly adopted the Pozdniakovs' solution, except for the treatment of glyphs like those in the series 420-430, which Pozdniakov (<a href="https://doi.org/10.4000/jso.6371">2011</a>) initially regarded as a ligature of hand glyphs 006 or 010 with anthropomorphic or ornitomorphic glyphs.</p>
-<p>In fact, it is unclear how those glyphs should be treated. In a recent paper, Pozdniakov (<a href="http://pozdniakov.free.fr/publications/2016_Correlation_of_graphical_features.pdf">2016</a>) cast doubt on whether glyphs of the series 220/240/320/340 should be considered as independent glyphs rather than allographs of 200/300, based on the observation that leg shapes are not independent of hand shapes.</p>
-<p>There are reasons to take that argument one step further and consider all anthropomorphic glyphs as allographs. The parallel passages below are striking:</p>
-<img src="img/parallels.png" width=400>
-<p>Other examples can be found in Aa7:Ra3, Br9:Bv3, Bv3:Ra4, Bv8:Sa5, Bv7 and probably many other places.</p>
-<p>If anthropomorphic glyphs in standing (200/300), seating in profile (280/380) and seating in frontal view (240/340) position are allographs, should we view ornitomorphic glyphs in the same manner? For example,  should we treat glyphs in the 430/630 series as "profile" versions of the frontal ornitomorphs (400/600)? Pozdniakov (<a href="http://pozdniakov.free.fr/publications/2016_Correlation_of_graphical_features.pdf">2016</a>) seems to hint at that possibility for glyphs in the 430 series, even suggesting that Barthel (1958) probably thought so. Here, I have adopted that view, merging all anthropomorphs and most ornitomorphs (except for those in the 660 series) in the simplified corpus.</p>
+<p>The recent work by the Pozdniakovs (<a href="https://doi.org/10.3406/jso.1996.1995">Pozdniakov 1996</a>; <a href="http://pozdniakov.free.fr/publications/2007_Rapanui_Writing_and_the_Rapanui_Language.pdf">Pozdniakov and Pozdniakov 2007</a>) and Paul Horley (<a href="https://evols.library.manoa.hawaii.edu/items/af73d1dc-60df-4143-ab68-770a56d81d82">2005</a>, <a href="https://evols.library.manoa.hawaii.edu/server/api/core/bitstreams/d68c64ef-12c2-4d79-ae8a-afb56a43c762/content">2007</a>) is focused on simplifying Barthel's catalogue by isolating the basic glyphs in RoR and comparing glyph and Rapanui syllable statistics. Similarly, Albert Davletshin (<a href="https://doi.org/10.4000/jso.6658">Davletshin 2012a</a>, <a href="https://doi.org/10.15286/jps.121.3.243-274">2012b</a>) has been attempting to separate syllabograms and logograms in RoR based on glyph combinatorial properties. Most recently, he propsed some syllabic readings of glyphs based on apparent logogram substitutions and use as phonetic complements (<a href="https://thepolynesiansociety.org/jps/index.php/JPS/article/view/579">Davletshin 2022</a>).</p>
 
-<h2>Data exploration <a name="Exploration"></a></h2>
-<p>We start by loading the tablets and language corpus.</p>
-<p>The following artefacts were retained for the analysis: A, B, C, D, E, G, N, P, R and S. G was selected as inclusive of the text in K, and P was selected as representative of H-P-Q. The Santiago Staff (I) reflects a very particular genre and structure (also present in parts of G-K), and was left out of the analysis for now. The selection can be changed in the <code>config.py</code> file.</p>
-<p>The rongorongo corpus is provided as a dictionary with artefacts' names (letters) as keys. Values are themselves dictionaries with each line as key and a string of glyphs as value:</p>
+<p>Martyn Harris and Tomi Melka have been moving the field in the direction of machine learning and natural language processing with  <i>n</i>-gram collocation and latent semantic analysis (LSA) (<a href="https://doi.org/10.1080/09296174.2011.556003">Harris and Melka 2011a</a>, <a href="https://doi.org/10.1080/09296174.2011.581850">2011b</a>).</p>
 
-{% highlight python %}
->>> from utils import load_data
->>> from config import TABLET_SUBSET
->>> 
->>> all_tablets = load_data('./tablets/tablets_clean.json')
->>> tablets = {tablet: all_tablets[tablet] for tablet in TABLET_SUBSET}
->>> 
->>> tablets['B']['Br1']
-'595-001-050-394-004-002-595-001-050-301-004-002-040-211-091-200-595-002-394-004-002-595-002-050-394-004-002-595-002-050-301-004-002-042-211-091-595-600-050-381-004-002-306-325-430-053-430-017-430-004-002-208-200-002-022-305-074-095-001-000-069'
-{% endhighlight %}
+<p>Finally, an updated tracing of the corpus using new recording methods is a priority in recent years (<a href="https://academic.oup.com/dsh/article/37/2/497/6387816">Lastilla et al. 2022</a>; <a href="https://www.rivisteweb.it/doi/10.1418/105968">Valerio et al. 2022</a>). The reference in that regard is Paul Horley's book (<a href="https://rapanuipress.com/producto/rongorongo-2">2021</a>) which, in addition to the publication of updated tracings of the entire corpus, also provides numerous discussions about the glyph catalogue, parallel passages, structured sequences and list entries.</p>
 
-<p>Once a particular set of texts is loaded, basic properties of the glyphs can be explored with the <code>GlyphStats</code> class. For example, the <code>get_percentages()</code> method returns a data frame with the ordered percentages and cumulative percentages of each glyph:</p>
+<h2>2023 Update<a name="Update"></a></h2>
 
-{% highlight python %}
->>> from explore.glyph_stats import GlyphStats
->>> 
->>> glyph_stats = GlyphStats(tablets)
->>> glyph_frequencies = glyph_stats.get_percentages()
->>> glyph_frequencies
-    Glyph                 Percent   Cumulative Percent
-0     001     0.06461710452766908  0.06461710452766908
-1     002     0.03666852990497484  0.10128563443264393
-2     004     0.03566238121855785   0.1369480156512018
-3     003     0.03476802683063164  0.17171604248183342
-4     022     0.02615986584684181  0.19787590832867524
-..    ...                     ...                  ...
-541   682  0.00011179429849077697   0.9995528228060321
-542   555  0.00011179429849077697   0.9996646171045228
-543   576  0.00011179429849077697   0.9997764114030135
-544   587  0.00011179429849077697   0.9998882057015043
-545   635  0.00011179429849077697    0.999999999999995
+<p>This is an update to my previous code (see ga_lstm folder), which used a genetic algorithm scored by an LSTM language model to "brute force" a mapping between glyphs and syllables.</p>
 
-[546 rows x 3 columns]
-{% endhighlight %}
+<p>The idea is to use syllable and glyph frequencies, combined with sequence-to-sequence (seq2seq) models, to map the glyphs to the language. Similar approaches have been proposed to decrypt substitution cyphers by encoding both source and target texts to a common space, either using the respective letter/symbol frequencies (<a href="https://aclanthology.org/2021.acl-long.561/">Aldarrab and May 2021</a>) or as recurrent integer sequences (<a href="https://aclanthology.org/2023.findings-eacl.160/">Kambhatla et al. 2023</a>).</p>
 
-<p>We see that the top 50 glyphs account for approximately 65% of the texts:</p>
+<h3>Seq2Seq Model</h3>
 
-{% highlight python %}
->>> glyph_frequencies.loc[[50]]
-   Glyph                Percent  Cumulative Percent
-50   711  0.0051425377305757405  0.6471771939631079
-{% endhighlight %}
+<p>Here, I use a selection of short recitations and chants, which most likely represent the genres present in some of the rongorongo texts (<a href="https://www.jstor.org/stable/40454429">Barthel 1960</a>; <a href="https://www.amazon.com/-/es/Olaf-Blixen/dp/B08HH2MZ5Q">Blixen 1979</a>; <a href="https://www.jstor.org/stable/20706594">Fischer 1994</a>). These texts, including the kaikai recitations that accompany string figures, very often preserve fossilised forms of the ancient Rapa Nui language. Assuming that rongorongo represents a logosyllabic writing system, the verses are split into syllables. The syllables are then converted to integer sequences according to the rank of each syllable by order of frequency.</p>
 
-<p>This is the same number of syllables in the Rapanui language, suggesting that the script may be predominantly syllabic. Notice that this is without doing any further simplification to the glyph catalogue, in which case the cumulative percent of the top 50 glyphs would be even higher (you can redo the analysis loading <code>'./tablets/tablets_clean.json'</code>). Let's save a list with the top 50 glyphs to be used later in the genetic algorithm. This can be done with the <code>get_top_n()</code> method:</p>
+<p>If decipherment was a simple matter of matching glyph and syllable frequencies, the solution would have been found long ago. Unfortunately, frequencies vary considerably depending on the subset of texts that is considered. To account for that, each verse is encoded ten times, each time based on the frequencies calculated from a random sample of verses, similar to the approach of <a href="https://aclanthology.org/2021.acl-long.561/">Aldarrab and May (2021)</a>.</p>
 
-{% highlight python %}
->>> top_glyphs = glyph_stats.get_top_n(50)
-{% endhighlight %}
+<p>An encoder-decoder model with attention is then trained with the integer sequences (i.e. each sylable encoded as its frequency rank) as sources and the syllable sequences as targets. I use a GRU model with 100 embedding units and 250 hidden units for both the encoder and the decoder (<a href="https://github.com/tensorflow/tensorflow/blob/r1.13/tensorflow/contrib/eager/python/examples/nmt_with_attention/nmt_with_attention.ipynb">the TensorFlow authors 2018</a>).</p>
 
-<p>Similarly, language properties can be analysed with the <code>LangStats</code> class. The Rapanui language corpus has been compiled from Barthel (<a href="https://www.jstor.org/stable/40454429?origin=JSTOR-pdf">1960</a>), Englert (1948), Campbell (1971), Métraux (1971) and Fedorova (1978) (available <a href="https://starlingdb.org/kozmin/polynesia/rapanui.php">here</a>). These are short songs, lore and recitations most likely to represent the same genera as the rongorongo texts.</p>
-<p>Some preprocessing is automatically done to separate the verses into syllables.</p>
+<p align="center"><img src="img/model.png" height="200"></p>
+<p align="center">The model is trained to predict Rapa Nui sentences from integer sequences based on syllable frequencies. Glyph sequences are then encoded in the same way and fed into the model. <i>Please, notice that the "decoded" glyphs are only shown as an example, and the correctness of such decoding is by no means endorsed.</i></p>
 
-{% highlight python %}
->>> from explore.lang_stats import LangStats
->>> 
->>> raw_corpus = load_data('./language/corpus.txt')
->>> lang_stats = LangStats(raw_corpus)
->>> 
->>> corpus = lang_stats.corpus
-{% endhighlight %}
+<p>Once trained, the model is tested on sequences of glyphs. I used the parallel passages catalogued by Horley (<a href="https://rapanuipress.com/producto/rongorongo-2">2021</a>). These are numerous mini-texts which are found in various tablets, often in different spellings, with some tablets almost entirely consisting of collations of such passages (<a href="https://doi.org/10.3406/jso.1996.1995">Pozdniakov 1996</a>; <a href="https://rws.xoba.com/ror/">Sproat 2003</a>; <a href="https://evols.library.manoa.hawaii.edu/server/api/core/bitstreams/d68c64ef-12c2-4d79-ae8a-afb56a43c762/content">Horley 2007</a>; among many others). It is possible that they are self-contained texts consisting of short invocations, chants, prayers etc. similar to the content of the selected Rapa Nui texts. Another advantage of using the parallel passages is that the beginning and end of the sequences can be determined - facilitating the analysis of glyph collocations (see below). The glyphs, originally transcribed using Barthel's (1958) catalogue, were converted into the encoding proposed by Horley (<a href="https://rapanuipress.com/producto/rongorongo-2">2021</a>), which, similar to previous proposals, simplifies the numerous ligatures in the catalogue to a set of about 130 basic glyphs. These are encoded according to their frequencies, just like the syllables in the language. Since there are many more glyphs than syllables (partly due to the source materials not distinguishing long vowels or the glottal stop), a maximum rank of 30 was considered, anything lower than that being encoded as 0.</p>
 
-<p>Before we move on to the language models and genetic algorithm, let's plot some transition matrices for the top 50 glyphs and syllables. We can obtain Markov matrices with the <code>get_matrix()</code> method:</p>
+<h3>Results</h3>
 
-{% highlight python %}
->>> glyph_matrix = glyph_stats.get_matrix()
->>> syl_matrix = lang_stats.get_matrix()
->>> 
->>> fig, axes = plt.subplots(1, 2)
->>> 
->>> axes[0].imshow(glyph_matrix[:50, :50])
->>> axes[0].title.set_text('Glyph bigrams')
->>> axes[0].set_xticks(list(range(50)))
->>> axes[0].set_yticks(list(range(50)))
->>> axes[0].set_xticklabels(top_glyphs, rotation=90)
->>> axes[0].set_yticklabels(top_glyphs)
->>> 
->>> axes[1].imshow(syl_matrix)
->>> axes[1].title.set_text('Syllable bigrams')
->>> axes[1].set_xticks(list(range(50)))
->>> axes[1].set_yticks(list(range(50)))
->>> axes[1].set_xticklabels(SYLLABLES, rotation=90)
->>> axes[1].set_yticklabels(SYLLABLES)
->>> 
->>> plt.show()
-{% endhighlight %}
+<p>Results were not consistent, preventing the assignment of syllabic values to specific glyphs. In fact, the frequency distribution of the glyphs is incompatible with that of the Rapa Nui syllables. While the latter obeys Zipf's law, as expected of natural language, the frequencies of the first and second most frequent glyphs - glyphs <img src="img/200.png" height="24"/> 200 and <img src="img/6.png" height="24"/> 6, respectively - are not too distant from each other. This is in agreement with the observation that glyph 200 may be a taxogram, frequently omitted in parallel passages and apparently used to connect other glyphs in ligatures (<a href="https://evols.library.manoa.hawaii.edu/server/api/core/bitstreams/61786979-0c4b-47aa-b284-32d112fda7e8/content">Guy 2006</a>). Thus, for the final evaluation, glyph 200 was omitted from the rongorongo sequences.</p>
 
-<img src="img/matrices.png">
+<p>To assess the viability of the decoding, the predicted texts were evaluated using perplexity based on a bigram model of the Rapa Nui corpus. In addition, the closest matches were sought between predicted sentences and the Rapa Nui verses based on the Levenshtein edit distance (file results.csv). The results were far from acceptable, but still provide some insights. Glyph drawings below are from Paul Horley (<a href="https://rapanuipress.com/producto/rongorongo-2">2021</a>).</p>
 
-<h2>A machine learning approach to decipherment <a name="Machine"></a></h2>
+<p align="center"><img src="img/decoding.png"height="400"></p>
+<p align="center">Attention weights and prediction from one parallel passage (#11, Ar3) (Horley 2021). <i>Please, notice that the "decoded" glyphs are only shown as an example, and the correctness of such decoding is by no means endorsed.</i></p>
 
-<p>Given a sufficiently long text written in an unknown script, decipherment is achievable - provided the underlying language and type of writing system are known. Many automated approaches to decipherment focus on maximising the likelihood of a translated text or vocabulary given a mapping of glyphs to phonemes, with the score given by a language model (<a href="https://aclanthology.org/W99-0906/">Knight and Yamada 1999</a>; <a href="https://aclanthology.org/P10-1107/">Snyder et al. 2010</a>; Berg-Kirkpatrick and Klein <a href="https://aclanthology.org/D11-1029/">2011</a>, <a href="https://aclanthology.org/D13-1087/">2013</a>; <a href="https://arxiv.org/abs/1906.06718">Luo et al. 2019</a>).</p>
-<p>Assuming that RoR is predominantly syllabic, as suggested by the glyph frequencies, one could perform a search (e.g. using genetic algorithms) through different mappings of glyphs to syllables. The problem is one of verifyability. How to decide on the plausibility of a deciphered text? Here, I tested a support vector machine (SVM) classifier and a Long Short-Term Memory (LSTM) neural network to predict whether a text is viable Rapanui.</p>
-<p>Models were trained on a corpus of (1) real Rapanui, and (2) pseudo-Rapanui verses created by encrypting the real verses with a substitution cypher (mapping to different syllables). I originally included two other categories - created by randomly concatenating syllables and by shuffling the syllables of real Rapanui verses. That resulted in models that were more difficult to train, so I left them out for now.</p>
-<p>Since there is no separation of words in RoR, all the texts were converted into continuous syllables separated by spaces (to facilitate tokenization). Texts were truncated to a maximum of 50 syllables (longer verses were split).</p>
+<p>Some of the readings agree with the position of the glyphs/syllables as starters or enders of sequences. The tables below show the five most frequent glyphs/syllables in the parallel passages and selected Rapa Nui corpus, as well as the five most frequent in the beginning and end of a sequence. As expected, the model often decodes glyph <img src="img/4.png" height="24"/> 4, which is the most frequent in the beginning of a sequence, as <i>i</i> or <i>ka</i>. The most frequent glyph, <img src="img/6.png" height="24"/> 6, is often decoded as <i>a</i>, as long postulated by Pozdniakov and Pozdniakov (<a href="http://pozdniakov.free.fr/publications/2007_Rapanui_Writing_and_the_Rapanui_Language.pdf">2007</a>). Notice that very different readings were recently proposed by Davletshin (<a href="https://thepolynesiansociety.org/jps/index.php/JPS/article/view/579">2022</a>) based on substitutions and apparent use as phonetic complements, which may provide a more fruitful approach towards decipherment.</p>
 
-<p>The first step is to create a labelled corpus with the real and pseudo-Rapanui to train the language models. This is done in the <code>CorpusLabeller</code> class:</p>
+<table>
+  <tr>
+    <th>Glyphs</th>
+    <th>Starters</th>
+    <th>Enders</th>
+  </tr>
+  <tr>
+    <td><img src="img/6.png" height="24"/> 6</td>
+    <td><img src="img/4.png" height="24"/> 4</td>
+    <td><img src="img/1.png" height="24"/> 1</td>
+  </tr>
+  <tr>
+    <td><img src="img/1.png" height="24"/> 1</td>
+    <td><img src="img/600.png" height="24"/> 600</td>
+    <td><img src="img/4.png" height="24"/> 4</td>
+  </tr>
+  <tr>
+    <td><img src="img/10.png" height="24"/> 10</td>
+    <td><img src="img/10.png" height="24"/> 10</td>
+    <td><img src="img/10.png" height="24"/> 10</td>
+  </tr>
+  <tr>
+    <td><img src="img/4.png" height="24"/> 4</td>
+    <td><img src="img/6.png" height="24"/> 6</td>
+    <td><img src="img/6.png" height="24"/> 6</td>
+  </tr>
+  <tr>
+    <td><img src="img/600.png" height="24"/> 600</td>
+    <td><img src="img/1.png" height="24"/> 1</td>
+    <td><img src="img/711.png" height="24"/> 711</td>
+  </tr>
+</table>
 
-{% highlight python %}
->>> corpus_labeller = CorpusLabeller(corpus)
->>> labelled_texts = corpus_labeller.labelled_texts
->>> 
->>> labelled_texts
-     index                                               text  label
-0      229  ve hi 'i ru ma ha ru ko he 'e ru ru ta 'e ru p...      1
-1      296                      hi te ku po ku te ku ku hi te      1
-2      343  mi vu ri pe ki ko pu ke ka pi ge pi to go hi k...      1
-3      384  ha ti me 'i na ku ti hu gu te ne ve tu me ke t...      1
-4      124  ra ga te 'i vi ta 'i na ka 'i ri 'a hi va 'a t...      0
-..     ...                                                ...    ...
-411      0  ki 'a ki 'a ki 'a ki 'a ta ri ra 'u ku ma ra '...      0
-412     60  he ta ho ga no ta pu ku ta ho ga he ki 'a ki '...      0
-413    205  ko 'a ta mu te 'a ri ki tu mu 'i ho 'a 'o te m...      0
-414    351  hu ku hi gu vo ru 'e hu ko hu ko ro gu pi ku g...      1
-415    359  va ni ke no no hu go ho va tu va ma to no mu t...      1
-{% endhighlight %}
+<table>
+  <tr>
+    <th>Syllables</th>
+    <th>Starters</th>
+    <th>Enders</th>
+  </tr>
+  <tr>
+    <td>a</td>
+    <td>ka</td>
+    <td>e</td>
+  </tr>
+  <tr>
+    <td>i</td>
+    <td>e</td>
+    <td>a</td>
+  </tr>
+  <tr>
+    <td>ka</td>
+    <td>ko</td>
+    <td>i</td>
+  </tr>
+  <tr>
+    <td>e</td>
+    <td>i</td>
+    <td>ga</td>
+  </tr>
+  <tr>
+    <td>u</td>
+    <td>a</td>
+    <td>na</td>
+  </tr>
+</table>
 
-<p>Where labels are 0 for real Rapanui and 1 for the pseudo-verses. Notice the data are randomly shuffled.</p>
+<h3>Conclusion</h3>
 
-<p>The absence of word separation is a major drawback that prevents, for example, the application of the model designed by Luo et al. (<a href="http://dx.doi.org/10.18653/v1/P19-1303">2019</a>), which depends on matching cognates at the word level.</p>
-
-<h3>LinearSVC and LSTM</h3>
-<p>Initially, a Linear Support Vector Classification (SVC) model was trained on the corpus with real Rapanui and the two pseudo datasets using an <i>n</i>-ngram range of 2 to 6 syllables. The classification achieves a high validation accuracy (near 100%). However, a problem that I found when using LinearSVC with a language like Rapanui (which has a very limited phonological inventory) is that it is very prone to misclassifying random concatenations of syllables that eventually contain Rapanui words, but which don't make sense as a sentence. Increasing the <i>n</i>-gram range did not solve this issue.</p>
-
-{% highlight python %}
->>> svc = LanguageModelSVC(labelled_texts)
->>> X_train, y_train, X_test, y_test = svc.make_training_data(0.1)
->>> svc.train(X_train, y_train, X_test, y_test)
-LinearSVC score: 1.0
-{% endhighlight %}
-
-<p>Because the order in which words occur is crucial for deciding whether a sentence is valid Rapanui (beyond the mere frequency of <i>n</i>-grams), a potential solution is to train a Long Short-Term Memory (LSTM) network. The network was built with an embedding layer of size 32, a bidirectional LSTM layer of size 128, a dropout of 20% and a dense output layer of size 2 (real Rapanui and the pseudo-corpus) with softmax activation. Other architectures are possible, but this yielded a high validation accuracy (over 95%).</p>
-<p>I used sklearn for the LinearSVC and tensorflow for the LSTM. Models can be loaded from the <code>models</code> folder.</p>
-
-{% highlight python %}
->>> lstm = LanguageModelLSTM(labelled_texts)
->>> X_train, y_train, X_test, y_test = lstm.make_training_data(0.1)
->>> lstm.build(32, 128, 0.2)
->>> lstm.train(X_train, y_train, 0.1, 50)
-...
-Epoch 50/50
-11/11 [==============================] - 0s 22ms/step - loss: 2.1150e-04 - accuracy: 1.0000 - val_loss: 0.1870 - val_accuracy: 0.9737
-{% endhighlight %}
-
-<h3>Genetic algorithm</h3>
-<p>Every genome in the population is a sequence of syllables to be matched with the top 50 most frequent glyphs.</p>
-<p>Because order is meaningful, I experimented with two different crossover methods - ordered crossover (OX1) and edge recombination crossover (ERX). The latter remains in the code, but OX1 was ultimately used due to its resulting in less drastic recombinations. Mutation involves swapping two random syllables.</p>
-<p>Every genome (map of glyphs to syllables) is evaluated by decoding the selected RoR corpus and getting the LSTM probability of belonging to the "real Rapanui" class. In essence, the more Rapanui-like the decoded text, the higher the score should be. The text is split when unmapped glyphs are encountered (another solution could be mapping them to OOV), resulting in various lines. Those longer than 10 syllables are scored by the LSTM model, the final score being an average of all decoded lines.</p>
-<p>The genetic algorithm was run for 100 generations with a population of 500 genomes, 200 parents, 50 elite genomes and probabilities of crossover and mutation of 0.8 and 0.1 respectively. The graph shows the best (red) and average (black) scores of the population.</p>
-
-{% highlight python %}
->>> ga = GeneticAlgorithm(tablets, lstm, top_glyphs, 500, 200, 50, 0.8, 0.1)
-Initializing population...
-Done
->>> ga.evolve(100, 10)
-Evolving...
-Generation 100	Best: 1.00	Avg: 1.00
->>> ga.plot()
-{% endhighlight %}
-
-<img src="img/ga.png" width=400>
-
-<p>The best mapping of glyphs to syllables can be accessed in the <code>best_key</code> attribute:</p>
-
-{% highlight python %}
->>> ga.best_key
-{'001': "'a", '002': 'ha', '004': 'ta', '003': 'ka', '022': "'i", '006': "'u", '600': "'e", '200': 'te', '005': 'ma', '010': 'mo', '700': 'va', '009': 'ku', '007': "'o", '380': 'vu', '040': 'ne', '008': 'he', '074': 'ho', '050': 'ga', '300': 'ki', '063': 'vi', '430': 'pe', '064': 'no', '020': 'po', '070': 'ti', '065': 'pa', '280': 'ni', '670': 'ra', '095': 'nu', '052': 'ge', '076': 'hu', '060': 've', '062': 'go', '048': 'hi', '522': 'ke', '044': 'pi', '053': 'tu', '067': 'ru', '306': 'pu', '091': 'gi', '061': 'me', '073': 'ro', '400': 'mi', '069': 'na', '381': 'gu', '066': 'vo', '011': 'ri', '059': 'mu', '450': 're', '025': 'ko', '027': 'to'}
-{% endhighlight %}
+<p>It was not possible to arrive at a viable decoding using the Seq2Seq model, which may be due to the small size of the corpus when compared to similar studies (<a href="https://aclanthology.org/2021.acl-long.561/">Aldarrab and May 2021</a>). The uncertainty about the glyph catalogue, as well as the presence of logograms and determinatives (taxograms) in addition to syllabic glyphs, are also factors that hinder an automated approach to decipherment.</p>
